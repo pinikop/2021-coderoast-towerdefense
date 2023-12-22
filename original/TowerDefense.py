@@ -4,9 +4,9 @@
 
 import math
 import random
-from tkinter import *
+from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
-from PIL import Image, ImageDraw, ImageTk
+from PIL import Image, ImageTk
 
 gridSize = 30  # the height and width of the array of blocks
 blockSize = 20  # pixels wide of each block
