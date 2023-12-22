@@ -44,7 +44,7 @@ MONSTERS_BY_HEALTH = []
 MONSTERS_BY_HEALTH_REVERSED = []
 MONSTERS_BY_DISTANCE = []
 MONSTERS_BY_DISTANCE_REVERSED = []
-monstersListList = [
+MONSTERS_LIST = [
     MONSTERS_BY_HEALTH,
     MONSTERS_BY_HEALTH_REVERSED,
     MONSTERS_BY_DISTANCE,
@@ -61,7 +61,6 @@ class Game:  # the main class that we call "Game"
     def __init__(self):  # setting up the window for the game here
         self.root = Tk()  # saying this window will use tkinter
         self.root.title("Tower Defense Ultra Mode")
-        self.RUN = True  # creating a variable RUN. does nothing yet.hu
         self.root.protocol("WM_DELETE_WINDOW", self.end)
 
         self.frame = Frame(master=self.root)
@@ -95,13 +94,12 @@ class Game:  # the main class that we call "Game"
         self.root.mainloop()  # starts running the tkinter graphics loop
 
     def run(self):
-        if self.RUN is True:  # always going to be true for now
-            self.update()  # calls the function 'def update(self):'
-            self.paint()  # calls the function 'def paint(self):'
+        self.update()  # calls the function 'def update(self):'
+        self.paint()  # calls the function 'def paint(self):'
 
-            self.root.after(
-                50, self.run
-            )  # does a run of the function every 50/1000 = 1/20 of a second
+        self.root.after(
+            50, self.run
+        )  # does a run of the function every 50/1000 = 1/20 of a second
 
     def end(self):
         self.root.destroy()  # closes the game window and ends the program
@@ -129,7 +127,7 @@ class Game:  # the main class that we call "Game"
         global MONSTERS_BY_HEALTH_REVERSED
         global MONSTERS_BY_DISTANCE
         global MONSTERS_BY_DISTANCE_REVERSED
-        global monstersListList
+        global MONSTERS_LIST
         MONSTERS_BY_HEALTH = sorted(MONSTERS, key=lambda x: x.health, reverse=True)
         MONSTERS_BY_DISTANCE = sorted(
             MONSTERS, key=lambda x: x.distanceTravelled, reverse=True
@@ -140,7 +138,7 @@ class Game:  # the main class that we call "Game"
         MONSTERS_BY_DISTANCE_REVERSED = sorted(
             MONSTERS, key=lambda x: x.distanceTravelled, reverse=False
         )
-        monstersListList = [
+        MONSTERS_LIST = [
             MONSTERS_BY_HEALTH,
             MONSTERS_BY_HEALTH_REVERSED,
             MONSTERS_BY_DISTANCE,
@@ -855,7 +853,7 @@ class TargetingTower(ShootingTower):
         self.stickyTarget = False
 
     def prepareShot(self):
-        self.checkList = monstersListList[self.targetList]
+        self.checkList = MONSTERS_LIST[self.targetList]
         if self.ticks != 20 / self.bulletsPerSecond:
             self.ticks += 1
         if self.stickyTarget == False:
