@@ -1222,4 +1222,9 @@ class WaterBlock(Block):
         self.canPlace = False
 
 
-game = Game()  # start the application at Class Game()
+def main():
+    Game()  # start the application at Class Game()
+
+
+if __name__ == "__main__":
+    main()
