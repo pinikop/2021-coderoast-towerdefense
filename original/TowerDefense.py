@@ -1,4 +1,6 @@
-# IMPORTANT INFORMATION: the use of 'self' ALWAYS refers to the class that it is in. EVERY FUNCTION INSIDE OF A CLASS MUST DECLARE SELF! ex: 'def exampleFunction(self, input1, input2):
+# IMPORTANT INFORMATION: the use of 'self' ALWAYS refers to the class that it is in.
+# EVERY FUNCTION INSIDE OF A CLASS MUST DECLARE SELF!
+# ex: 'def exampleFunction(self, input1, input2):
 
 import math
 import random
