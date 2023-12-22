@@ -8,14 +8,14 @@ from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
 from PIL import Image, ImageTk
 
-gridSize = 30  # the height and width of the array of blocks
-blockSize = 20  # pixels wide of each block
-mapSize = gridSize * blockSize
-blockGrid = [
-    [0 for y in range(gridSize)] for x in range(gridSize)
+GRID_SIZE = 30  # the height and width of the array of blocks
+BLOCK_SIZE = 20  # pixels wide of each block
+MAP_SIZE = GRID_SIZE * BLOCK_SIZE
+BLOCK_GRID = [
+    [0 for y in range(GRID_SIZE)] for x in range(GRID_SIZE)
 ]  # creates the array for the grid
-blockDictionary = ["NormalBlock", "PathBlock", "WaterBlock"]
-monsterDictionary = [
+BLOCK_DICT = ["NormalBlock", "PathBlock", "WaterBlock"]
+MONSTER_DICT = [
     "Monster1",
     "Monster2",
     "AlexMonster",
@@ -23,38 +23,38 @@ monsterDictionary = [
     "LeoMonster",
     "MonsterBig",
 ]
-towerDictionary = {
+TOWER_DICT = {
     "Arrow Shooter": "ArrowShooterTower",
     "Bullet Shooter": "BulletShooterTower",
     "Tack Tower": "TackTower",
     "Power Tower": "PowerTower",
 }
-towerCost = {
+TOWER_COST = {
     "Arrow Shooter": 150,
     "Bullet Shooter": 150,
     "Tack Tower": 150,
     "Power Tower": 200,
 }
-towerGrid = [[None for y in range(gridSize)] for x in range(gridSize)]
-pathList = []
-spawnx = 0
-spawny = 0
-monsters = []
-monstersByHealth = []
-monstersByHealthReversed = []
-monstersByDistance = []
-monstersByDistanceReversed = []
+TOWER_GRID = [[None for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
+PATH_LIST = []
+SPAWN_X = 0
+SPAWN_Y = 0
+MONSTERS = []
+MONSTERS_BY_HEALTH = []
+MONSTERS_BY_HEALTH_REVERSED = []
+MONSTERS_BY_DISTANCE = []
+MONSTERS_BY_DISTANCE_REVERSED = []
 monstersListList = [
-    monstersByHealth,
-    monstersByHealthReversed,
-    monstersByDistance,
-    monstersByDistanceReversed,
+    MONSTERS_BY_HEALTH,
+    MONSTERS_BY_HEALTH_REVERSED,
+    MONSTERS_BY_DISTANCE,
+    MONSTERS_BY_DISTANCE_REVERSED,
 ]
-projectiles = []
-health = 100
-money = 5000000000
-selectedTower = "<None>"
-displayTower = None
+PROJECTILES = []
+HEALTH = 100
+MONEY = 5000000000
+SELECTED_TOWER = "<None>"
+DISPLAY_TOWER = None
 
 
 class Game:  # the main class that we call "Game"
@@ -69,8 +69,8 @@ class Game:  # the main class that we call "Game"
 
         self.canvas = Canvas(
             master=self.frame,
-            width=mapSize,
-            height=mapSize,
+            width=MAP_SIZE,
+            height=MAP_SIZE,
             bg="white",
             highlightthickness=0,
         )  # actually creates a window and puts our frame on it
@@ -110,47 +110,47 @@ class Game:  # the main class that we call "Game"
         self.mouse.update()
         self.wavegenerator.update()
         self.displayboard.update()
-        for i in range(len(projectiles)):
+        for i in range(len(PROJECTILES)):
             try:
-                projectiles[i].update()
+                PROJECTILES[i].update()
             except:
                 pass
-        for y in range(gridSize):
-            for x in range(gridSize):
-                blockGrid[x][
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
+                BLOCK_GRID[x][
                     y
                 ].update()  # updates each block one by one by going to its 'def update():' command
-        for i in range(len(monsters)):
+        for i in range(len(MONSTERS)):
             try:
-                monsters[i].update()
+                MONSTERS[i].update()
             except:
                 pass
-        global monstersByHealth
-        global monstersByHealthReversed
-        global monstersByDistance
-        global monstersByDistanceReversed
+        global MONSTERS_BY_HEALTH
+        global MONSTERS_BY_HEALTH_REVERSED
+        global MONSTERS_BY_DISTANCE
+        global MONSTERS_BY_DISTANCE_REVERSED
         global monstersListList
-        monstersByHealth = sorted(monsters, key=lambda x: x.health, reverse=True)
-        monstersByDistance = sorted(
-            monsters, key=lambda x: x.distanceTravelled, reverse=True
+        MONSTERS_BY_HEALTH = sorted(MONSTERS, key=lambda x: x.health, reverse=True)
+        MONSTERS_BY_DISTANCE = sorted(
+            MONSTERS, key=lambda x: x.distanceTravelled, reverse=True
         )
-        monstersByHealthReversed = sorted(
-            monsters, key=lambda x: x.health, reverse=False
+        MONSTERS_BY_HEALTH_REVERSED = sorted(
+            MONSTERS, key=lambda x: x.health, reverse=False
         )
-        monstersByDistanceReversed = sorted(
-            monsters, key=lambda x: x.distanceTravelled, reverse=False
+        MONSTERS_BY_DISTANCE_REVERSED = sorted(
+            MONSTERS, key=lambda x: x.distanceTravelled, reverse=False
         )
         monstersListList = [
-            monstersByHealth,
-            monstersByHealthReversed,
-            monstersByDistance,
-            monstersByDistanceReversed,
+            MONSTERS_BY_HEALTH,
+            MONSTERS_BY_HEALTH_REVERSED,
+            MONSTERS_BY_DISTANCE,
+            MONSTERS_BY_DISTANCE_REVERSED,
         ]
 
-        for y in range(gridSize):
-            for x in range(gridSize):
-                if towerGrid[x][y]:
-                    towerGrid[x][
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
+                if TOWER_GRID[x][y]:
+                    TOWER_GRID[x][
                         y
                     ].update()  # updates each tower one by one by going to its 'def update():' command
 
@@ -160,16 +160,16 @@ class Game:  # the main class that we call "Game"
         self.mouse.paint(
             self.canvas
         )  # draw the mouse dot by going to its 'def paint(canvas):' command
-        for y in range(gridSize):
-            for x in range(gridSize):
-                if towerGrid[x][y]:
-                    towerGrid[x][y].paint(self.canvas)
-        for i in range(len(monstersByDistanceReversed)):
-            monstersByDistanceReversed[i].paint(self.canvas)
-        for i in range(len(projectiles)):
-            projectiles[i].paint(self.canvas)
-        if displayTower:
-            displayTower.paintSelect(self.canvas)
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
+                if TOWER_GRID[x][y]:
+                    TOWER_GRID[x][y].paint(self.canvas)
+        for i in range(len(MONSTERS_BY_DISTANCE_REVERSED)):
+            MONSTERS_BY_DISTANCE_REVERSED[i].paint(self.canvas)
+        for i in range(len(PROJECTILES)):
+            PROJECTILES[i].paint(self.canvas)
+        if DISPLAY_TOWER:
+            DISPLAY_TOWER.paintSelect(self.canvas)
         self.displayboard.paint()
 
 
@@ -179,31 +179,31 @@ class Map:
         self.loadMap("LeoMap")
 
     def loadMap(self, mapName):
-        self.drawnMap = Image.new("RGBA", (mapSize, mapSize), (255, 255, 255, 255))
+        self.drawnMap = Image.new("RGBA", (MAP_SIZE, MAP_SIZE), (255, 255, 255, 255))
         self.mapFile = open("texts/mapTexts/" + mapName + ".txt", "r")
         self.gridValues = list(map(int, (self.mapFile.read()).split()))
-        for y in range(gridSize):
-            for x in range(gridSize):
-                global blockGrid
-                self.blockNumber = self.gridValues[gridSize * y + x]
-                self.blockType = globals()[blockDictionary[self.blockNumber]]
-                blockGrid[x][y] = self.blockType(
-                    x * blockSize + blockSize / 2,
-                    y * blockSize + blockSize / 2,
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
+                global BLOCK_GRID
+                self.blockNumber = self.gridValues[GRID_SIZE * y + x]
+                self.blockType = globals()[BLOCK_DICT[self.blockNumber]]
+                BLOCK_GRID[x][y] = self.blockType(
+                    x * BLOCK_SIZE + BLOCK_SIZE / 2,
+                    y * BLOCK_SIZE + BLOCK_SIZE / 2,
                     self.blockNumber,
                     x,
                     y,
                 )  # creates a grid of Blocks
-                blockGrid[x][y].paint(self.drawnMap)
+                BLOCK_GRID[x][y].paint(self.drawnMap)
         self.drawnMap.save("images/mapImages/" + mapName + ".png")
         self.image = Image.open("images/mapImages/" + mapName + ".png")
         self.image = ImageTk.PhotoImage(self.image)
 
     def saveMap(self):
         self.mapFile = open("firstMap.txt", "w")
-        for y in range(gridSize):
-            for x in range(gridSize):
-                self.mapFile.write(blockGrid[x][y].blockType + " ")
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
+                self.mapFile.write(BLOCK_GRID[x][y].blockType + " ")
         self.mapFile.close()
 
     def paint(self, canvas):
@@ -237,24 +237,24 @@ class Wavegenerator:
             self.maxTicks = self.currentWave[0]
 
     def findSpawn(self):
-        global spawnx
-        global spawny
-        for x in range(gridSize):
-            if isinstance(blockGrid[x][0], PathBlock):
+        global SPAWN_X
+        global SPAWN_Y
+        for x in range(GRID_SIZE):
+            if isinstance(BLOCK_GRID[x][0], PathBlock):
                 self.gridx = x
-                spawnx = x * blockSize + blockSize / 2
-                spawny = 0
+                SPAWN_X = x * BLOCK_SIZE + BLOCK_SIZE / 2
+                SPAWN_Y = 0
                 return
-        for y in range(gridSize):
-            if isinstance(blockGrid[0][y], PathBlock):
+        for y in range(GRID_SIZE):
+            if isinstance(BLOCK_GRID[0][y], PathBlock):
                 self.gridy = y
-                spawnx = 0
-                spawny = y * blockSize + blockSize / 2
+                SPAWN_X = 0
+                SPAWN_Y = y * BLOCK_SIZE + BLOCK_SIZE / 2
                 return
 
     def move(self):
-        global pathList
-        pathList.append(self.direction)
+        global PATH_LIST
+        PATH_LIST.append(self.direction)
         if self.direction == 1:
             self.gridx += 1
         if self.direction == 2:
@@ -268,11 +268,11 @@ class Wavegenerator:
     def decideMove(self):
         if (
             self.direction != 2
-            and self.gridx < gridSize - 1
+            and self.gridx < GRID_SIZE - 1
             and self.gridy >= 0
-            and self.gridy <= gridSize - 1
+            and self.gridy <= GRID_SIZE - 1
         ):
-            if isinstance(blockGrid[self.gridx + 1][self.gridy], PathBlock):
+            if isinstance(BLOCK_GRID[self.gridx + 1][self.gridy], PathBlock):
                 self.direction = 1
                 self.move()
                 return
@@ -281,20 +281,20 @@ class Wavegenerator:
             self.direction != 1
             and self.gridx > 0
             and self.gridy >= 0
-            and self.gridy <= gridSize - 1
+            and self.gridy <= GRID_SIZE - 1
         ):
-            if isinstance(blockGrid[self.gridx - 1][self.gridy], PathBlock):
+            if isinstance(BLOCK_GRID[self.gridx - 1][self.gridy], PathBlock):
                 self.direction = 2
                 self.move()
                 return
 
         if (
             self.direction != 4
-            and self.gridy < gridSize - 1
+            and self.gridy < GRID_SIZE - 1
             and self.gridx >= 0
-            and self.gridx <= gridSize - 1
+            and self.gridx <= GRID_SIZE - 1
         ):
-            if isinstance(blockGrid[self.gridx][self.gridy + 1], PathBlock):
+            if isinstance(BLOCK_GRID[self.gridx][self.gridy + 1], PathBlock):
                 self.direction = 3
                 self.move()
                 return
@@ -303,21 +303,21 @@ class Wavegenerator:
             self.direction != 3
             and self.gridy > 0
             and self.gridx >= 0
-            and self.gridx <= gridSize - 1
+            and self.gridx <= GRID_SIZE - 1
         ):
-            if isinstance(blockGrid[self.gridx][self.gridy - 1], PathBlock):
+            if isinstance(BLOCK_GRID[self.gridx][self.gridy - 1], PathBlock):
                 self.direction = 4
                 self.move()
                 return
 
-        global pathList
-        pathList.append(5)
+        global PATH_LIST
+        PATH_LIST.append(5)
 
     def spawnMonster(self):
         self.monsterType = globals()[
-            monsterDictionary[self.currentWave[self.currentMonster]]
+            MONSTER_DICT[self.currentWave[self.currentMonster]]
         ]
-        monsters.append(self.monsterType(0))
+        MONSTERS.append(self.monsterType(0))
         self.currentMonster = self.currentMonster + 1
 
     def update(self):
@@ -342,11 +342,11 @@ class NextWaveButton:
 
     def checkPress(self, click, x, y):
         if x >= self.x and y >= self.y and x <= self.xTwo and y <= self.yTwo:
-            if self.canPress and click and len(monsters) == 0:
+            if self.canPress and click and len(MONSTERS) == 0:
                 self.game.wavegenerator.getWave()
 
     def paint(self, canvas):
-        if self.canPress and len(monsters) == 0:
+        if self.canPress and len(MONSTERS) == 0:
             self.color = "blue"
         else:
             self.color = "red"
@@ -384,8 +384,8 @@ class TargetButton(MyButton):
         self.type = myType
 
     def pressed(self):
-        global displayTower
-        displayTower.targetList = self.type
+        global DISPLAY_TOWER
+        DISPLAY_TOWER.targetList = self.type
 
 
 class StickyButton(MyButton):
@@ -393,11 +393,11 @@ class StickyButton(MyButton):
         super(StickyButton, self).__init__(x, y, xTwo, yTwo)
 
     def pressed(self):
-        global displayTower
-        if displayTower.stickyTarget == False:
-            displayTower.stickyTarget = True
+        global DISPLAY_TOWER
+        if DISPLAY_TOWER.stickyTarget == False:
+            DISPLAY_TOWER.stickyTarget = True
         else:
-            displayTower.stickyTarget = False
+            DISPLAY_TOWER.stickyTarget = False
 
 
 class SellButton(MyButton):
@@ -405,9 +405,9 @@ class SellButton(MyButton):
         super(SellButton, self).__init__(x, y, xTwo, yTwo)
 
     def pressed(self):
-        global displayTower
-        displayTower.sold()
-        displayTower = None
+        global DISPLAY_TOWER
+        DISPLAY_TOWER.sold()
+        DISPLAY_TOWER = None
 
 
 class UpgradeButton(MyButton):
@@ -415,11 +415,11 @@ class UpgradeButton(MyButton):
         super(UpgradeButton, self).__init__(x, y, xTwo, yTwo)
 
     def pressed(self):
-        global money
-        global displayTower
-        if money >= displayTower.upgradeCost:
-            money -= displayTower.upgradeCost
-            displayTower.upgrade()
+        global MONEY
+        global DISPLAY_TOWER
+        if MONEY >= DISPLAY_TOWER.upgradeCost:
+            MONEY -= DISPLAY_TOWER.upgradeCost
+            DISPLAY_TOWER.upgrade()
 
 
 class Infoboard:
@@ -443,22 +443,22 @@ class Infoboard:
         self.canvas.delete(ALL)  # clear the screen
         self.canvas.create_image(0, 0, image=self.image, anchor=NW)
         self.currentButtons = []
-        if displayTower == None:
+        if DISPLAY_TOWER == None:
             return
 
         self.towerImage = ImageTk.PhotoImage(
             Image.open(
                 "images/towerImages/"
-                + displayTower.__class__.__name__
+                + DISPLAY_TOWER.__class__.__name__
                 + "/"
-                + str(displayTower.level)
+                + str(DISPLAY_TOWER.level)
                 + ".png"
             )
         )
-        self.canvas.create_text(80, 75, text=displayTower.name, font=("times", 20))
+        self.canvas.create_text(80, 75, text=DISPLAY_TOWER.name, font=("times", 20))
         self.canvas.create_image(5, 5, image=self.towerImage, anchor=NW)
 
-        if issubclass(displayTower.__class__, TargetingTower):
+        if issubclass(DISPLAY_TOWER.__class__, TargetingTower):
             self.currentButtons.append(TargetButton(26, 30, 35, 39, 0))
             self.canvas.create_text(
                 37, 28, text="> Health", font=("times", 12), fill="white", anchor=NW
@@ -481,12 +481,12 @@ class Infoboard:
 
             self.currentButtons.append(StickyButton(10, 40, 19, 49))
             self.currentButtons.append(SellButton(5, 145, 78, 168))
-            if displayTower.upgradeCost:
+            if DISPLAY_TOWER.upgradeCost:
                 self.currentButtons.append(UpgradeButton(82, 145, 155, 168))
                 self.canvas.create_text(
                     120,
                     157,
-                    text="Upgrade: " + str(displayTower.upgradeCost),
+                    text="Upgrade: " + str(DISPLAY_TOWER.upgradeCost),
                     font=("times", 12),
                     fill="light green",
                     anchor=CENTER,
@@ -496,20 +496,20 @@ class Infoboard:
                 28, 146, text="Sell", font=("times", 22), fill="light green", anchor=NW
             )
 
-            self.currentButtons[displayTower.targetList].paint(self.canvas)
-            if displayTower.stickyTarget == True:
+            self.currentButtons[DISPLAY_TOWER.targetList].paint(self.canvas)
+            if DISPLAY_TOWER.stickyTarget == True:
                 self.currentButtons[4].paint(self.canvas)
 
     def displayGeneric(self):
         self.currentButtons = []
-        if selectedTower == "<None>":
+        if SELECTED_TOWER == "<None>":
             self.text = None
             self.towerImage = None
         else:
-            self.text = selectedTower + " cost: " + str(towerCost[selectedTower])
+            self.text = SELECTED_TOWER + " cost: " + str(TOWER_COST[SELECTED_TOWER])
             self.towerImage = ImageTk.PhotoImage(
                 Image.open(
-                    "images/towerImages/" + towerDictionary[selectedTower] + "/1.png"
+                    "images/towerImages/" + TOWER_DICT[SELECTED_TOWER] + "/1.png"
                 )
             )
         self.canvas.delete(ALL)  # clear the screen
@@ -555,7 +555,7 @@ class Towerbox:
             highlightthickness=0,
         )
         self.box.insert(END, "<None>")
-        for i in towerDictionary:
+        for i in TOWER_DICT:
             self.box.insert(END, i)
         for i in range(50):
             self.box.insert(END, "<None>")
@@ -563,10 +563,10 @@ class Towerbox:
         self.box.bind("<<ListboxSelect>>", self.onselect)
 
     def onselect(self, event):
-        global selectedTower
-        global displayTower
-        selectedTower = str(self.box.get(self.box.curselection()))
-        displayTower = None
+        global SELECTED_TOWER
+        global DISPLAY_TOWER
+        SELECTED_TOWER = str(self.box.get(self.box.curselection()))
+        DISPLAY_TOWER = None
         self.game.infoboard.displayGeneric()
 
 
@@ -609,13 +609,13 @@ class Mouse:
             self.xoffset = 0
             self.yoffset = 0
         elif event.widget == self.game.infoboard.canvas:
-            self.xoffset = mapSize
+            self.xoffset = MAP_SIZE
             self.yoffset = 0
         elif event.widget == self.game.towerbox.box:
-            self.xoffset = mapSize
+            self.xoffset = MAP_SIZE
             self.yoffset = 174
         elif event.widget == self.game.displayboard.canvas:
-            self.yoffset = mapSize
+            self.yoffset = MAP_SIZE
             self.xoffset = 0
         self.x = event.x + self.xoffset  # sets the "Mouse" x to the real mouse's x
         self.y = event.y + self.yoffset  # sets the "Mouse" y to the real mouse's y
@@ -623,17 +623,17 @@ class Mouse:
             self.x = 0
         if self.y < 0:
             self.y = 0
-        self.gridx = int((self.x - (self.x % blockSize)) / blockSize)
-        self.gridy = int((self.y - (self.y % blockSize)) / blockSize)
+        self.gridx = int((self.x - (self.x % BLOCK_SIZE)) / BLOCK_SIZE)
+        self.gridy = int((self.y - (self.y % BLOCK_SIZE)) / BLOCK_SIZE)
 
     def update(self):
         if (
             self.gridx >= 0
-            and self.gridx <= gridSize - 1
+            and self.gridx <= GRID_SIZE - 1
             and self.gridy >= 0
-            and self.gridy <= gridSize - 1
+            and self.gridy <= GRID_SIZE - 1
         ):
-            blockGrid[self.gridx][self.gridy].hoveredOver(self.pressed, self.game)
+            BLOCK_GRID[self.gridx][self.gridy].hoveredOver(self.pressed, self.game)
         else:
             self.game.displayboard.nextWaveButton.checkPress(
                 self.pressed, self.x - self.xoffset, self.y - self.yoffset
@@ -645,21 +645,21 @@ class Mouse:
     def paint(self, canvas):
         if (
             self.gridx >= 0
-            and self.gridx <= gridSize - 1
+            and self.gridx <= GRID_SIZE - 1
             and self.gridy >= 0
-            and self.gridy <= gridSize - 1
+            and self.gridy <= GRID_SIZE - 1
         ):
-            if blockGrid[self.gridx][self.gridy].canPlace:
+            if BLOCK_GRID[self.gridx][self.gridy].canPlace:
                 canvas.create_image(
-                    self.gridx * blockSize,
-                    self.gridy * blockSize,
+                    self.gridx * BLOCK_SIZE,
+                    self.gridy * BLOCK_SIZE,
                     image=self.image,
                     anchor=NW,
                 )
             else:
                 canvas.create_image(
-                    self.gridx * blockSize,
-                    self.gridy * blockSize,
+                    self.gridx * BLOCK_SIZE,
+                    self.gridy * BLOCK_SIZE,
                     image=self.canNotPressImage,
                     anchor=NW,
                 )
@@ -667,10 +667,10 @@ class Mouse:
 
 class Healthbar:
     def __init__(self):
-        self.text = str(health)
+        self.text = str(HEALTH)
 
     def update(self):
-        self.text = str(health)
+        self.text = str(HEALTH)
 
     def paint(self, canvas):
         canvas.create_text(40, 40, text="Health: " + self.text, fill="black")
@@ -678,10 +678,10 @@ class Healthbar:
 
 class Moneybar:
     def __init__(self):
-        self.text = str(money)
+        self.text = str(MONEY)
 
     def update(self):
-        self.text = str(money)
+        self.text = str(MONEY)
 
     def paint(self, canvas):
         canvas.create_text(240, 40, text="Money: " + self.text, fill="black")
@@ -692,7 +692,7 @@ class Projectile(object):
         self.hit = False
         self.x = x
         self.y = y
-        self.speed = blockSize / 2
+        self.speed = BLOCK_SIZE / 2
         self.damage = damage
         self.speed = speed
         # self.image = Image.open("images/projectileImages/"+self.__class__.__name__+ ".png")
@@ -701,7 +701,7 @@ class Projectile(object):
     def update(self):
         try:
             if target.alive == False:
-                projectiles.remove(self)
+                PROJECTILES.remove(self)
                 return
         except:
             if self.hit:
@@ -711,7 +711,7 @@ class Projectile(object):
 
     def gotMonster(self):
         self.target.health -= self.damage
-        projectiles.remove(self)
+        PROJECTILES.remove(self)
 
     def paint(self, canvas):
         canvas.create_image(self.x, self.y, image=self.image)
@@ -750,7 +750,7 @@ class PowerShot(TrackingBullet):
         self.target.health -= self.damage
         if self.target.movement > (self.target.speed) / self.slow:
             self.target.movement = (self.target.speed) / self.slow
-        projectiles.remove(self)
+        PROJECTILES.remove(self)
 
 
 class AngledProjectile(Projectile):
@@ -766,26 +766,26 @@ class AngledProjectile(Projectile):
         self.distance = 0
 
     def checkHit(self):
-        for i in range(len(monsters)):
-            if (monsters[i].x - self.x) ** 2 + (monsters[i].y - self.y) ** 2 <= (
-                blockSize
-            ) ** 2:
+        for i in range(len(MONSTERS)):
+            if (MONSTERS[i].x - self.x) ** 2 + (
+                MONSTERS[i].y - self.y
+            ) ** 2 <= BLOCK_SIZE**2:
                 self.hit = True
-                self.target = monsters[i]
+                self.target = MONSTERS[i]
                 return
 
     def gotMonster(self):
         self.target.health -= self.damage
         self.target.tick = 0
         self.target.maxTick = 5
-        projectiles.remove(self)
+        PROJECTILES.remove(self)
 
     def move(self):
         self.x += self.xChange
         self.y += self.yChange
         self.distance += self.speed
         if self.distance >= self.range:
-            projectiles.remove(self)
+            PROJECTILES.remove(self)
 
 
 class Tower(object):
@@ -819,7 +819,7 @@ class Tower(object):
         self.nextLevel()
 
     def sold(self):
-        towerGrid[self.gridx][self.gridy] = None
+        TOWER_GRID[self.gridx][self.gridy] = None
 
     def paintSelect(self, canvas):
         canvas.create_oval(
@@ -860,14 +860,14 @@ class TargetingTower(ShootingTower):
             self.ticks += 1
         if self.stickyTarget == False:
             for i in range(len(self.checkList)):
-                if (self.range + blockSize / 2) ** 2 >= (
+                if (self.range + BLOCK_SIZE / 2) ** 2 >= (
                     self.x - self.checkList[i].x
                 ) ** 2 + (self.y - self.checkList[i].y) ** 2:
                     self.target = self.checkList[i]
         if self.target:
             if (
                 self.target.alive
-                and (self.range + blockSize / 2)
+                and (self.range + BLOCK_SIZE / 2)
                 >= ((self.x - self.target.x) ** 2 + (self.y - self.target.y) ** 2)
                 ** 0.5
             ):
@@ -878,7 +878,7 @@ class TargetingTower(ShootingTower):
                 self.target = None
         elif self.stickyTarget == True:
             for i in range(len(self.checkList)):
-                if (self.range + blockSize / 2) ** 2 >= (
+                if (self.range + BLOCK_SIZE / 2) ** 2 >= (
                     self.x - self.checkList[i].x
                 ) ** 2 + (self.y - self.checkList[i].y) ** 2:
                     self.target = self.checkList[i]
@@ -889,16 +889,16 @@ class ArrowShooterTower(TargetingTower):
         super(ArrowShooterTower, self).__init__(x, y, gridx, gridy)
         self.name = "Arrow Shooter"
         self.infotext = "ArrowShooterTower at [" + str(gridx) + "," + str(gridy) + "]."
-        self.range = blockSize * 10
+        self.range = BLOCK_SIZE * 10
         self.bulletsPerSecond = 1
         self.damage = 10
-        self.speed = blockSize
+        self.speed = BLOCK_SIZE
         self.upgradeCost = 50
 
     def nextLevel(self):
         if self.level == 2:
             self.upgradeCost = 100
-            self.range = blockSize * 11
+            self.range = BLOCK_SIZE * 11
             self.damage = 12
         elif self.level == 3:
             self.upgradeCost = None
@@ -906,14 +906,14 @@ class ArrowShooterTower(TargetingTower):
 
     def shoot(self):
         self.angle = math.atan2(self.y - self.target.y, self.target.x - self.x)
-        projectiles.append(
+        PROJECTILES.append(
             AngledProjectile(
                 self.x,
                 self.y,
                 self.damage,
                 self.speed,
                 self.angle,
-                self.range + blockSize / 2,
+                self.range + BLOCK_SIZE / 2,
             )
         )
 
@@ -923,13 +923,13 @@ class BulletShooterTower(TargetingTower):
         super(BulletShooterTower, self).__init__(x, y, gridx, gridy)
         self.name = "Bullet Shooter"
         self.infotext = "BulletShooterTower at [" + str(gridx) + "," + str(gridy) + "]."
-        self.range = blockSize * 6
+        self.range = BLOCK_SIZE * 6
         self.bulletsPerSecond = 4
         self.damage = 5
-        self.speed = blockSize / 2
+        self.speed = BLOCK_SIZE / 2
 
     def shoot(self):
-        projectiles.append(
+        PROJECTILES.append(
             TrackingBullet(self.x, self.y, self.damage, self.speed, self.target)
         )
 
@@ -939,14 +939,14 @@ class PowerTower(TargetingTower):
         super(PowerTower, self).__init__(x, y, gridx, gridy)
         self.name = "Power Tower"
         self.infotext = "PowerTower at [" + str(gridx) + "," + str(gridy) + "]."
-        self.range = blockSize * 8
+        self.range = BLOCK_SIZE * 8
         self.bulletsPerSecond = 10
         self.damage = 1
-        self.speed = blockSize
+        self.speed = BLOCK_SIZE
         self.slow = 3
 
     def shoot(self):
-        projectiles.append(
+        PROJECTILES.append(
             PowerShot(self.x, self.y, self.damage, self.speed, self.target, self.slow)
         )
 
@@ -956,15 +956,15 @@ class TackTower(TargetingTower):
         super(TackTower, self).__init__(x, y, gridx, gridy)
         self.name = "Tack Tower"
         self.infotext = "TackTower at [" + str(gridx) + "," + str(gridy) + "]."
-        self.range = blockSize * 5
+        self.range = BLOCK_SIZE * 5
         self.bulletsPerSecond = 1
         self.damage = 10
-        self.speed = blockSize
+        self.speed = BLOCK_SIZE
 
     def shoot(self):
         for i in range(8):
             self.angle = math.radians(i * 45)
-            projectiles.append(
+            PROJECTILES.append(
                 AngledProjectile(
                     self.x, self.y, self.damage, self.speed, self.angle, self.range
                 )
@@ -1009,45 +1009,45 @@ class Monster(object):
         self.tick += 1
 
     def positionFormula(self, distance):
-        self.xPos = spawnx
-        self.yPos = spawny + blockSize / 2
-        self.blocks = int((distance - (distance % blockSize)) / blockSize)
+        self.xPos = SPAWN_X
+        self.yPos = SPAWN_Y + BLOCK_SIZE / 2
+        self.blocks = int((distance - (distance % BLOCK_SIZE)) / BLOCK_SIZE)
         if self.blocks != 0:
             for i in range(self.blocks):
-                if pathList[i] == 1:
-                    self.xPos += blockSize
-                elif pathList[i] == 2:
-                    self.xPos -= blockSize
-                elif pathList[i] == 3:
-                    self.yPos += blockSize
+                if PATH_LIST[i] == 1:
+                    self.xPos += BLOCK_SIZE
+                elif PATH_LIST[i] == 2:
+                    self.xPos -= BLOCK_SIZE
+                elif PATH_LIST[i] == 3:
+                    self.yPos += BLOCK_SIZE
                 else:
-                    self.yPos -= blockSize
-        if distance % blockSize != 0:
-            if pathList[self.blocks] == 1:
-                self.xPos += distance % blockSize
-            elif pathList[self.blocks] == 2:
-                self.xPos -= distance % blockSize
-            elif pathList[self.blocks] == 3:
-                self.yPos += distance % blockSize
+                    self.yPos -= BLOCK_SIZE
+        if distance % BLOCK_SIZE != 0:
+            if PATH_LIST[self.blocks] == 1:
+                self.xPos += distance % BLOCK_SIZE
+            elif PATH_LIST[self.blocks] == 2:
+                self.xPos -= distance % BLOCK_SIZE
+            elif PATH_LIST[self.blocks] == 3:
+                self.yPos += distance % BLOCK_SIZE
             else:
-                self.yPos -= distance % blockSize
-        if pathList[self.blocks] == 5:
+                self.yPos -= distance % BLOCK_SIZE
+        if PATH_LIST[self.blocks] == 5:
             self.gotThrough()
         return self.xPos, self.yPos
 
     def killed(self):
-        global money
-        money += self.value
+        global MONEY
+        MONEY += self.value
         self.die()
 
     def gotThrough(self):
-        global health
-        health -= 1
+        global HEALTH
+        HEALTH -= 1
         self.die()
 
     def die(self):
         self.alive = False
-        monsters.remove(self)
+        MONSTERS.remove(self)
 
     def paint(self, canvas):
         canvas.create_rectangle(
@@ -1075,9 +1075,9 @@ class Monster1(Monster):
         self.maxHealth = 30
         self.health = self.maxHealth
         self.value = 5
-        self.speed = float(blockSize) / 2
-        self.movement = blockSize / 3
-        self.axis = blockSize / 2
+        self.speed = float(BLOCK_SIZE) / 2
+        self.movement = BLOCK_SIZE / 3
+        self.axis = BLOCK_SIZE / 2
 
 
 class Monster2(Monster):
@@ -1086,15 +1086,15 @@ class Monster2(Monster):
         self.maxHealth = 50
         self.health = self.maxHealth
         self.value = 10
-        self.speed = float(blockSize) / 4
-        self.movement = float(blockSize) / 4
-        self.axis = blockSize / 2
+        self.speed = float(BLOCK_SIZE) / 4
+        self.movement = float(BLOCK_SIZE) / 4
+        self.axis = BLOCK_SIZE / 2
 
     def killed(self):
-        global money
-        money += self.value
-        monsters.append(
-            Monster1(self.distanceTravelled + blockSize * (0.5 - random.random()))
+        global MONEY
+        MONEY += self.value
+        MONSTERS.append(
+            Monster1(self.distanceTravelled + BLOCK_SIZE * (0.5 - random.random()))
         )
         self.die()
 
@@ -1105,16 +1105,16 @@ class AlexMonster(Monster):
         self.maxHealth = 500
         self.health = self.maxHealth
         self.value = 100
-        self.speed = float(blockSize) / 5
-        self.movement = float(blockSize) / 5
-        self.axis = blockSize
+        self.speed = float(BLOCK_SIZE) / 5
+        self.movement = float(BLOCK_SIZE) / 5
+        self.axis = BLOCK_SIZE
 
     def killed(self):
-        global money
-        money += self.value
+        global MONEY
+        MONEY += self.value
         for i in range(5):
-            monsters.append(
-                Monster2(self.distanceTravelled + blockSize * (0.5 - random.random()))
+            MONSTERS.append(
+                Monster2(self.distanceTravelled + BLOCK_SIZE * (0.5 - random.random()))
             )
         self.die()
 
@@ -1125,16 +1125,18 @@ class BenMonster(Monster):
         self.maxHealth = 200
         self.health = self.maxHealth
         self.value = 30
-        self.speed = float(blockSize) / 4
-        self.movement = float(blockSize) / 4
-        self.axis = blockSize / 2
+        self.speed = float(BLOCK_SIZE) / 4
+        self.movement = float(BLOCK_SIZE) / 4
+        self.axis = BLOCK_SIZE / 2
 
     def killed(self):
-        global money
-        money += self.value
+        global MONEY
+        MONEY += self.value
         for i in range(2):
-            monsters.append(
-                LeoMonster(self.distanceTravelled + blockSize * (0.5 - random.random()))
+            MONSTERS.append(
+                LeoMonster(
+                    self.distanceTravelled + BLOCK_SIZE * (0.5 - random.random())
+                )
             )
         self.die()
 
@@ -1145,9 +1147,9 @@ class LeoMonster(Monster):
         self.maxHealth = 20
         self.health = self.maxHealth
         self.value = 2
-        self.speed = float(blockSize) / 2
-        self.movement = float(blockSize) / 2
-        self.axis = blockSize / 4
+        self.speed = float(BLOCK_SIZE) / 2
+        self.movement = float(BLOCK_SIZE) / 2
+        self.axis = BLOCK_SIZE / 4
 
 
 class MonsterBig(Monster):
@@ -1156,9 +1158,9 @@ class MonsterBig(Monster):
         self.maxHealth = 1000
         self.health = self.maxHealth
         self.value = 10
-        self.speed = float(blockSize) / 6
-        self.movement = float(blockSize) / 6
-        self.axis = 3 * blockSize / 2
+        self.speed = float(BLOCK_SIZE) / 6
+        self.movement = float(BLOCK_SIZE) / 6
+        self.axis = 3 * BLOCK_SIZE / 2
 
 
 class Block(object):
@@ -1172,28 +1174,28 @@ class Block(object):
         self.gridx = gridx
         self.gridy = gridy
         self.image = None
-        self.axis = blockSize / 2
+        self.axis = BLOCK_SIZE / 2
 
     def hoveredOver(self, click, game):
         if click == True:
-            global towerGrid
-            global money
-            if towerGrid[self.gridx][self.gridy]:
-                if selectedTower == "<None>":
-                    towerGrid[self.gridx][self.gridy].clicked = True
-                    global displayTower
-                    displayTower = towerGrid[self.gridx][self.gridy]
+            global TOWER_GRID
+            global MONEY
+            if TOWER_GRID[self.gridx][self.gridy]:
+                if SELECTED_TOWER == "<None>":
+                    TOWER_GRID[self.gridx][self.gridy].clicked = True
+                    global DISPLAY_TOWER
+                    DISPLAY_TOWER = TOWER_GRID[self.gridx][self.gridy]
                     game.infoboard.displaySpecific()
             elif (
-                selectedTower != "<None>"
+                SELECTED_TOWER != "<None>"
                 and self.canPlace == True
-                and money >= towerCost[selectedTower]
+                and MONEY >= TOWER_COST[SELECTED_TOWER]
             ):
-                self.towerType = globals()[towerDictionary[selectedTower]]
-                towerGrid[self.gridx][self.gridy] = self.towerType(
+                self.towerType = globals()[TOWER_DICT[SELECTED_TOWER]]
+                TOWER_GRID[self.gridx][self.gridy] = self.towerType(
                     self.x, self.y, self.gridx, self.gridy
                 )
-                money -= towerCost[selectedTower]
+                MONEY -= TOWER_COST[SELECTED_TOWER]
 
     def update(self):
         pass
