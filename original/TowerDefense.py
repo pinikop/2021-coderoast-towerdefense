@@ -285,10 +285,8 @@ class WaveGenerator:
         PATH_LIST.append(5)
 
     def spawn_monster(self):
-        self.monsterType = globals()[
-            MONSTER_DICT[self.current_wave[self.current_monster]]
-        ]
-        MONSTERS.append(self.monsterType(0))
+        monster = globals()[MONSTER_DICT[self.current_wave[self.current_monster]]]
+        MONSTERS.append(monster(0))
         self.current_monster = self.current_monster + 1
 
     def update(self):
