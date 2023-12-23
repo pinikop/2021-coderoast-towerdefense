@@ -160,7 +160,7 @@ class Game:  # the main class that we call "Game"
         for i in range(len(PROJECTILES)):
             PROJECTILES[i].paint(self.canvas)
         if DISPLAY_TOWER:
-            DISPLAY_TOWER.paintSelect(self.canvas)
+            DISPLAY_TOWER.paint_select(self.canvas)
         self.display_board.paint()
 
 
@@ -484,7 +484,7 @@ class InfoBoard:
             if DISPLAY_TOWER.sticky_target == True:
                 self.current_buttons[4].paint(self.canvas)
 
-    def displayGeneric(self):
+    def display_generic(self):
         self.current_buttons = []
         if SELECTED_TOWER == "<None>":
             self.text = None
@@ -551,7 +551,7 @@ class TowerBox:
         global DISPLAY_TOWER
         SELECTED_TOWER = str(self.box.get(self.box.curselection()))
         DISPLAY_TOWER = None
-        self.game.info_board.displayGeneric()
+        self.game.info_board.display_generic()
 
 
 class Mouse:
@@ -801,7 +801,7 @@ class Tower(object):
     def sold(self):
         TOWER_GRID[self.grid_x][self.grid_y] = None
 
-    def paintSelect(self, canvas):
+    def paint_select(self, canvas):
         canvas.create_oval(
             self.x - self.range,
             self.y - self.range,
