@@ -90,10 +90,7 @@ class Game:  # the main class that we call "Game"
     def run(self):
         self.update()  # calls the function 'def update(self):'
         self.paint()  # calls the function 'def paint(self):'
-
-        self.root.after(
-            50, self.run
-        )  # does a run of the function every 50/1000 = 1/20 of a second
+        self.root.after(50, self.run)  # refresh @ 20 Hz
 
     def end(self):
         self.root.destroy()  # closes the game window and ends the program
@@ -102,9 +99,9 @@ class Game:  # the main class that we call "Game"
         self.mouse.update()
         self.wave_generator.update()
         self.display_board.update()
-        for i in range(len(PROJECTILES)):
+        for projectile in PROJECTILES:
             try:
-                PROJECTILES[i].update()
+                projectile.update()
             except:
                 pass
         for x, y in product(range(GRID_SIZE), repeat=2):
