@@ -36,7 +36,7 @@ TOWER_COST = {
     "Tack Tower": 150,
     "Power Tower": 200,
 }
-TOWER_GRID = [[None for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
+TOWER_GRID = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 PATH_LIST = []
 SPAWN_X = 0
 SPAWN_Y = 0
