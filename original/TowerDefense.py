@@ -77,12 +77,12 @@ class Game:  # the main class that we call "Game"
             row=0, column=0, rowspan=2, columnspan=1
         )  # makes the window called "canvas" complete
 
-        self.display_board = Displayboard(self)
-        self.info_board = Infoboard(self)
-        self.tower_box = Towerbox(self)
+        self.display_board = DisplayBoard(self)
+        self.info_board = InfoBoard(self)
+        self.tower_box = TowerBox(self)
         self.mouse = Mouse(self)
         self.game_map = Map()
-        self.wave_generator = Wavegenerator(self)
+        self.wave_generator = WaveGenerator(self)
         self.run()  # calls the function 'def run(self):'
         self.root.mainloop()  # starts running the tkinter graphics loop
 
@@ -194,7 +194,7 @@ class Map:
         canvas.create_image(0, 0, image=self.image, anchor=NW)
 
 
-class Wavegenerator:
+class WaveGenerator:
     def __init__(self, game):
         self.game = game
         self.done = False
@@ -406,7 +406,7 @@ class UpgradeButton(MyButton):
             DISPLAY_TOWER.upgrade()
 
 
-class Infoboard:
+class InfoBoard:
     def __init__(self, game):
         self.canvas = Canvas(
             master=game.frame, width=162, height=174, bg="gray", highlightthickness=0
@@ -502,14 +502,14 @@ class Infoboard:
         self.canvas.create_image(5, 5, image=self.towerImage, anchor=NW)
 
 
-class Displayboard:
+class DisplayBoard:
     def __init__(self, game):
         self.canvas = Canvas(
             master=game.frame, width=600, height=80, bg="gray", highlightthickness=0
         )
         self.canvas.grid(row=2, column=0)
-        self.health_bar = Healthbar()
-        self.money_bar = Moneybar()
+        self.health_bar = HealthBar()
+        self.money_bar = MoneyBar()
         self.next_wave_button = NextWaveButton(game)
         self.paint()
 
@@ -524,7 +524,7 @@ class Displayboard:
         self.next_wave_button.paint(self.canvas)
 
 
-class Towerbox:
+class TowerBox:
     def __init__(self, game):
         self.game = game
         self.box = Listbox(
@@ -651,7 +651,7 @@ class Mouse:
                 )
 
 
-class Healthbar:
+class HealthBar:
     def __init__(self):
         self.text = str(HEALTH)
 
@@ -662,7 +662,7 @@ class Healthbar:
         canvas.create_text(40, 40, text="Health: " + self.text, fill="black")
 
 
-class Moneybar:
+class MoneyBar:
     def __init__(self):
         self.text = str(MONEY)
 
