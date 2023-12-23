@@ -100,17 +100,12 @@ class Game:  # the main class that we call "Game"
         self.wave_generator.update()
         self.display_board.update()
         for projectile in PROJECTILES:
-            try:
-                projectile.update()
-            except:
-                pass
+            projectile.update()
         for x, y in product(range(GRID_SIZE), repeat=2):
             BLOCK_GRID[x][y].update()  # updates each block one by one
         for monster in MONSTERS:
-            try:
-                monster.update()
-            except:
-                pass
+            monster.update()
+
         global MONSTERS_BY_HEALTH
         global MONSTERS_BY_HEALTH_REVERSED
         global MONSTERS_BY_DISTANCE
@@ -663,15 +658,13 @@ class Projectile:
         self.speed = speed
 
     def update(self):
-        try:
-            if target.alive == False:
-                PROJECTILES.remove(self)
-                return
-        except:
-            if self.hit:
-                self.got_monster()
-            self.move()
-            self.check_hit()
+        if target and not target.alive:
+            PROJECTILES.remove(self)
+            return
+        if self.hit:
+            self.got_monster()
+        self.move()
+        self.check_hit()
 
     def got_monster(self):
         self.target.health -= self.damage
