@@ -4,6 +4,7 @@
 
 import math
 import random
+from itertools import product
 from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
 from PIL import Image, ImageTk
@@ -134,12 +135,9 @@ class Game:  # the main class that we call "Game"
             MONSTERS_BY_DISTANCE_REVERSED,
         ]
 
-        for y in range(GRID_SIZE):
-            for x in range(GRID_SIZE):
-                if TOWER_GRID[x][y]:
-                    TOWER_GRID[x][
-                        y
-                    ].update()  # updates each tower one by one by going to its 'def update():' command
+        for x, y in product(range(GRID_SIZE), repeat=2):
+            if TOWER_GRID[x][y]:
+                TOWER_GRID[x][y].update()  # updates each tower one by one
 
     def paint(self):
         self.canvas.delete(ALL)  # clear the screen
@@ -147,10 +145,9 @@ class Game:  # the main class that we call "Game"
         self.mouse.paint(
             self.canvas
         )  # draw the mouse dot by going to its 'def paint(canvas):' command
-        for y in range(GRID_SIZE):
-            for x in range(GRID_SIZE):
-                if TOWER_GRID[x][y]:
-                    TOWER_GRID[x][y].paint(self.canvas)
+        for x, y in product(range(GRID_SIZE), repeat=2):
+            if TOWER_GRID[x][y]:
+                TOWER_GRID[x][y].paint(self.canvas)
         for i in range(len(MONSTERS_BY_DISTANCE_REVERSED)):
             MONSTERS_BY_DISTANCE_REVERSED[i].paint(self.canvas)
         for i in range(len(PROJECTILES)):
@@ -169,19 +166,18 @@ class Map:
         self.drawn_map = Image.new("RGBA", (MAP_SIZE, MAP_SIZE), (255, 255, 255, 255))
         self.map_file = open("texts/mapTexts/" + mapName + ".txt", "r")
         self.grid_values = list(map(int, (self.map_file.read()).split()))
-        for y in range(GRID_SIZE):
-            for x in range(GRID_SIZE):
-                global BLOCK_GRID
-                self.block_number = self.grid_values[GRID_SIZE * y + x]
-                self.block_type = globals()[BLOCK_DICT[self.block_number]]
-                BLOCK_GRID[x][y] = self.block_type(
-                    x * BLOCK_SIZE + BLOCK_SIZE / 2,
-                    y * BLOCK_SIZE + BLOCK_SIZE / 2,
-                    self.block_number,
-                    x,
-                    y,
-                )  # creates a grid of Blocks
-                BLOCK_GRID[x][y].paint(self.drawn_map)
+        for x, y in product(range(GRID_SIZE), repeat=2):
+            global BLOCK_GRID
+            self.block_number = self.grid_values[GRID_SIZE * y + x]
+            self.block_type = globals()[BLOCK_DICT[self.block_number]]
+            BLOCK_GRID[x][y] = self.block_type(
+                x * BLOCK_SIZE + BLOCK_SIZE / 2,
+                y * BLOCK_SIZE + BLOCK_SIZE / 2,
+                self.block_number,
+                x,
+                y,
+            )  # creates a grid of Blocks
+            BLOCK_GRID[x][y].paint(self.drawn_map)
         self.drawn_map.save("images/mapImages/" + mapName + ".png")
         self.image = Image.open("images/mapImages/" + mapName + ".png")
         self.image = ImageTk.PhotoImage(self.image)
