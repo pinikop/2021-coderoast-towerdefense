@@ -356,7 +356,7 @@ class BaseButton:
 
 class TargetButton(BaseButton):
     def __init__(self, x1, y1, x2, y2, my_type):
-        super(TargetButton, self).__init__(x1, y1, x2, y2)
+        super().__init__(x1, y1, x2, y2)
         self.type = my_type
 
     def pressed(self):
@@ -366,7 +366,7 @@ class TargetButton(BaseButton):
 
 class StickyButton(BaseButton):
     def __init__(self, x1, y1, x2, y2):
-        super(StickyButton, self).__init__(x1, y1, x2, y2)
+        super().__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global DISPLAY_TOWER
@@ -376,7 +376,7 @@ class StickyButton(BaseButton):
 
 class SellButton(BaseButton):
     def __init__(self, x1, y1, x2, y2):
-        super(SellButton, self).__init__(x1, y1, x2, y2)
+        super().__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global DISPLAY_TOWER
@@ -386,7 +386,7 @@ class SellButton(BaseButton):
 
 class UpgradeButton(BaseButton):
     def __init__(self, x1, y1, x2, y2):
-        super(UpgradeButton, self).__init__(x1, y1, x2, y2)
+        super().__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global MONEY
@@ -654,7 +654,7 @@ class MoneyBar:
         canvas.create_text(240, 40, text="Money: " + self.text, fill="black")
 
 
-class Projectile(object):
+class Projectile:
     def __init__(self, x, y, damage, speed):
         self.hit = False
         self.x = x
@@ -683,7 +683,7 @@ class Projectile(object):
 
 class TrackingBullet(Projectile):
     def __init__(self, x, y, damage, speed, target):
-        super(TrackingBullet, self).__init__(x, y, damage, speed)
+        super().__init__(x, y, damage, speed)
         self.target = target
         self.image = Image.open("images/projectileImages/bullet.png")
         self.image = ImageTk.PhotoImage(self.image)
@@ -707,7 +707,7 @@ class TrackingBullet(Projectile):
 
 class PowerShot(TrackingBullet):
     def __init__(self, x, y, damage, speed, target, slow):
-        super(PowerShot, self).__init__(x, y, damage, speed, target)
+        super().__init__(x, y, damage, speed, target)
         self.slow = slow
         self.image = Image.open("images/projectileImages/powerShot.png")
         self.image = ImageTk.PhotoImage(self.image)
@@ -721,7 +721,7 @@ class PowerShot(TrackingBullet):
 
 class AngledProjectile(Projectile):
     def __init__(self, x, y, damage, speed, angle, givenRange):
-        super(AngledProjectile, self).__init__(x, y, damage, speed)
+        super().__init__(x, y, damage, speed)
         self.change_x = speed * math.cos(angle)
         self.change_y = speed * math.sin(-angle)
         self.range = givenRange
@@ -752,7 +752,7 @@ class AngledProjectile(Projectile):
             PROJECTILES.remove(self)
 
 
-class Tower(object):
+class Tower:
     def __init__(self, x, y, grid_x, grid_y):
         self.upgrade_cost = None
         self.level = 1
@@ -798,7 +798,7 @@ class Tower(object):
 
 class ShootingTower(Tower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(ShootingTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.bullets_per_second = None
         self.ticks = 0
         self.damage = 0
@@ -810,7 +810,7 @@ class ShootingTower(Tower):
 
 class TargetingTower(ShootingTower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(TargetingTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.target = None
         self.target_list = 0
         self.sticky_target = False
@@ -847,7 +847,7 @@ class TargetingTower(ShootingTower):
 
 class ArrowShooterTower(TargetingTower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(ArrowShooterTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.name = "Arrow Shooter"
         self.info_text = (
             "ArrowShooterTower at [" + str(grid_x) + "," + str(grid_y) + "]."
@@ -883,7 +883,7 @@ class ArrowShooterTower(TargetingTower):
 
 class BulletShooterTower(TargetingTower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(BulletShooterTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.name = "Bullet Shooter"
         self.info_text = (
             "BulletShooterTower at [" + str(grid_x) + "," + str(grid_y) + "]."
@@ -901,7 +901,7 @@ class BulletShooterTower(TargetingTower):
 
 class PowerTower(TargetingTower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(PowerTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.name = "Power Tower"
         self.info_text = "PowerTower at [" + str(grid_x) + "," + str(grid_y) + "]."
         self.range = BLOCK_SIZE * 8
@@ -918,7 +918,7 @@ class PowerTower(TargetingTower):
 
 class TackTower(TargetingTower):
     def __init__(self, x, y, grid_x, grid_y):
-        super(TackTower, self).__init__(x, y, grid_x, grid_y)
+        super().__init__(x, y, grid_x, grid_y)
         self.name = "Tack Tower"
         self.info_text = "TackTower at [" + str(grid_x) + "," + str(grid_y) + "]."
         self.range = BLOCK_SIZE * 5
@@ -936,7 +936,7 @@ class TackTower(TargetingTower):
             )
 
 
-class Monster(object):
+class Monster:
     def __init__(self, distance):
         self.alive = True
         self.image = None
@@ -1036,7 +1036,7 @@ class Monster(object):
 
 class Monster1(Monster):
     def __init__(self, distance):
-        super(Monster1, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 30
         self.health = self.max_health
         self.value = 5
@@ -1047,7 +1047,7 @@ class Monster1(Monster):
 
 class Monster2(Monster):
     def __init__(self, distance):
-        super(Monster2, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 50
         self.health = self.max_health
         self.value = 10
@@ -1066,7 +1066,7 @@ class Monster2(Monster):
 
 class AlexMonster(Monster):
     def __init__(self, distance):
-        super(AlexMonster, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 500
         self.health = self.max_health
         self.value = 100
@@ -1086,7 +1086,7 @@ class AlexMonster(Monster):
 
 class BenMonster(Monster):
     def __init__(self, distance):
-        super(BenMonster, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 200
         self.health = self.max_health
         self.value = 30
@@ -1108,7 +1108,7 @@ class BenMonster(Monster):
 
 class LeoMonster(Monster):
     def __init__(self, distance):
-        super(LeoMonster, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 20
         self.health = self.max_health
         self.value = 2
@@ -1119,7 +1119,7 @@ class LeoMonster(Monster):
 
 class MonsterBig(Monster):
     def __init__(self, distance):
-        super(MonsterBig, self).__init__(distance)
+        super().__init__(distance)
         self.max_health = 1000
         self.health = self.max_health
         self.value = 10
@@ -1128,7 +1128,7 @@ class MonsterBig(Monster):
         self.axis = 3 * BLOCK_SIZE / 2
 
 
-class Block(object):
+class Block:
     def __init__(
         self, x, y, block_number, grid_x, grid_y
     ):  # when i define a "Block", this is what happens
@@ -1176,18 +1176,18 @@ class Block(object):
 
 class NormalBlock(Block):
     def __init__(self, x, y, block_number, grid_x, grid_y):
-        super(NormalBlock, self).__init__(x, y, block_number, grid_x, grid_y)
+        super().__init__(x, y, block_number, grid_x, grid_y)
 
 
 class PathBlock(Block):
     def __init__(self, x, y, block_number, grid_x, grid_y):
-        super(PathBlock, self).__init__(x, y, block_number, grid_x, grid_y)
+        super().__init__(x, y, block_number, grid_x, grid_y)
         self.can_place = False
 
 
 class WaterBlock(Block):
     def __init__(self, x, y, block_number, grid_x, grid_y):
-        super(WaterBlock, self).__init__(x, y, block_number, grid_x, grid_y)
+        super().__init__(x, y, block_number, grid_x, grid_y)
         self.can_place = False
 
 
