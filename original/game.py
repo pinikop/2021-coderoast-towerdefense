@@ -1,13 +1,16 @@
+import tkinter as tk
+
+
 class Game:  # the main class that we call "Game"
     def __init__(self):  # setting up the window for the game here
-        self.root = Tk()  # saying this window will use tkinter
+        self.root = tk.Tk()  # saying this window will use tkinter
         self.root.title("Tower Defense Ultra Mode")
         self.root.protocol("WM_DELETE_WINDOW", self.end)
 
-        self.frame = Frame(master=self.root)
+        self.frame = tk.Frame(master=self.root)
         self.frame.grid(row=0, column=0)
 
-        self.canvas = Canvas(
+        self.canvas = tk.Canvas(
             master=self.frame,
             width=MAP_SIZE,
             height=MAP_SIZE,
@@ -69,7 +72,7 @@ class Game:  # the main class that we call "Game"
                 TOWER_GRID[x][y].update()  # updates each tower one by one
 
     def paint(self):
-        self.canvas.delete(ALL)  # clear the screen
+        self.canvas.delete(tk.ALL)  # clear the screen
         self.game_map.paint(self.canvas)
         self.mouse.paint(self.canvas)  # draw the mouse dot
         for x, y in product(range(GRID_SIZE), repeat=2):
