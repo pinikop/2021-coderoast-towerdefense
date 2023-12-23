@@ -2,9 +2,14 @@ import tkinter as tk
 
 
 class Game:  # the main class that we call "Game"
-    def __init__(self):  # setting up the window for the game here
+    def __init__(self, title: str, width: int, height: int, time_step: int = 50):
+        self.title = title
+        self.width = width
+        self.height = height
+        self.time_step = time_step
+
         self.root = tk.Tk()  # saying this window will use tkinter
-        self.root.title("Tower Defense Ultra Mode")
+        self.root.title(title)
         self.root.protocol("WM_DELETE_WINDOW", self.end)
 
         self.frame = tk.Frame(master=self.root)
@@ -12,8 +17,8 @@ class Game:  # the main class that we call "Game"
 
         self.canvas = tk.Canvas(
             master=self.frame,
-            width=MAP_SIZE,
-            height=MAP_SIZE,
+            width=self.width,
+            height=self.height,
             bg="white",
             highlightthickness=0,
         )  # actually creates a window and puts our frame on it
@@ -33,7 +38,7 @@ class Game:  # the main class that we call "Game"
     def run(self):
         self.update()  # calls the function 'def update(self):'
         self.paint()  # calls the function 'def paint(self):'
-        self.root.after(50, self.run)  # refresh @ 20 Hz
+        self.root.after(self.time_step, self.run)  # refresh @ 20 Hz
 
     def end(self):
         self.root.destroy()  # closes the game window and ends the program
