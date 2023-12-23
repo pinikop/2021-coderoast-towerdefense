@@ -125,12 +125,8 @@ class Game:  # the main class that we call "Game"
         MONSTERS_BY_DISTANCE = sorted(
             MONSTERS, key=lambda x: x.distance_traveled, reverse=True
         )
-        MONSTERS_BY_HEALTH_REVERSED = sorted(
-            MONSTERS, key=lambda x: x.health, reverse=False
-        )
-        MONSTERS_BY_DISTANCE_REVERSED = sorted(
-            MONSTERS, key=lambda x: x.distance_traveled, reverse=False
-        )
+        MONSTERS_BY_HEALTH_REVERSED = MONSTERS_BY_HEALTH[::-1]
+        MONSTERS_BY_DISTANCE_REVERSED = MONSTERS_BY_DISTANCE[::-1]
         MONSTERS_LIST = [
             MONSTERS_BY_HEALTH,
             MONSTERS_BY_HEALTH_REVERSED,
