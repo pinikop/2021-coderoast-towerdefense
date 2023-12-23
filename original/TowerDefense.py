@@ -305,14 +305,14 @@ class WaveGenerator:
 class NextWaveButton:
     def __init__(self, game):
         self.game = game
-        self.x = 450
-        self.y = 25
+        self.x1 = 450
+        self.y1 = 25
         self.x2 = 550
         self.y2 = 50
         self.can_press = True
 
     def is_within_bounds(self, x: int, y: int) -> bool:
-        return self.x <= x <= self.x2 and self.y <= y <= self.y2
+        return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
 
     def check_press(self, click, x, y):
         if (
@@ -329,20 +329,20 @@ class NextWaveButton:
         else:
             self.color = "red"
         canvas.create_rectangle(
-            self.x, self.y, self.x2, self.y2, fill=self.color, outline=self.color
+            self.x1, self.y1, self.x2, self.y2, fill=self.color, outline=self.color
         )  # draws a rectangle where the pointer is
         canvas.create_text(500, 37, text="Next Wave")
 
 
 class BaseButton:
-    def __init__(self, x, y, x2, y2):
-        self.x = x
-        self.y = y
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
         self.x2 = x2
         self.y2 = y2
 
     def is_within_bounds(self, x: int, y: int) -> bool:
-        return self.x <= x <= self.x2 and self.y <= y <= self.y2
+        return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
 
     def check_press(self, click, x, y):
         if self.is_within_bounds(x, y):
@@ -355,13 +355,13 @@ class BaseButton:
 
     def paint(self, canvas):
         canvas.create_rectangle(
-            self.x, self.y, self.x2, self.y2, fill="red", outline="black"
+            self.x1, self.y1, self.x2, self.y2, fill="red", outline="black"
         )
 
 
 class TargetButton(BaseButton):
-    def __init__(self, x, y, x2, y2, my_type):
-        super(TargetButton, self).__init__(x, y, x2, y2)
+    def __init__(self, x1, y1, x2, y2, my_type):
+        super(TargetButton, self).__init__(x1, y1, x2, y2)
         self.type = my_type
 
     def pressed(self):
@@ -370,8 +370,8 @@ class TargetButton(BaseButton):
 
 
 class StickyButton(BaseButton):
-    def __init__(self, x, y, x2, y2):
-        super(StickyButton, self).__init__(x, y, x2, y2)
+    def __init__(self, x1, y1, x2, y2):
+        super(StickyButton, self).__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global DISPLAY_TOWER
@@ -380,8 +380,8 @@ class StickyButton(BaseButton):
 
 
 class SellButton(BaseButton):
-    def __init__(self, x, y, x2, y2):
-        super(SellButton, self).__init__(x, y, x2, y2)
+    def __init__(self, x1, y1, x2, y2):
+        super(SellButton, self).__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global DISPLAY_TOWER
@@ -390,8 +390,8 @@ class SellButton(BaseButton):
 
 
 class UpgradeButton(BaseButton):
-    def __init__(self, x, y, x2, y2):
-        super(UpgradeButton, self).__init__(x, y, x2, y2)
+    def __init__(self, x1, y1, x2, y2):
+        super(UpgradeButton, self).__init__(x1, y1, x2, y2)
 
     def pressed(self):
         global MONEY
