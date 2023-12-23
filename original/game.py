@@ -1,4 +1,13 @@
 import tkinter as tk
+from typing import List, Optional, Protocol
+
+
+class GameObject(Protocol):
+    def update(self):
+        """Update the game object"""
+
+    def paint(self, canvas: tk.Canvas):
+        """Paints the game object"""
 
 
 class Game:  # the main class that we call "Game"
@@ -7,6 +16,9 @@ class Game:  # the main class that we call "Game"
         self.width = width
         self.height = height
         self.time_step = time_step
+
+        self.running = False
+        self.timer_id: Optional[str] = None
 
         self.root = tk.Tk()  # saying this window will use tkinter
         self.root.title(title)
@@ -21,72 +33,43 @@ class Game:  # the main class that we call "Game"
             height=self.height,
             bg="white",
             highlightthickness=0,
-        )  # actually creates a window and puts our frame on it
-        self.canvas.grid(
-            row=0, column=0, rowspan=2, columnspan=1
-        )  # makes the window called "canvas" complete
+        )
 
-        self.display_board = DisplayBoard(self)
-        self.info_board = InfoBoard(self)
-        self.tower_box = TowerBox(self)
-        self.mouse = Mouse(self)
-        self.game_map = Map()
-        self.wave_generator = WaveGenerator(self)
-        self.run()  # calls the function 'def run(self):'
-        self.root.mainloop()  # starts running the tkinter graphics loop
+        # makes the window called "canvas" complete
+        self.canvas.grid(row=0, column=0, rowspan=2, columnspan=1)
+
+        self.objects: List[GameObject] = []
+
+    def add_object(self, object: GameObject):
+        self.objects.append(object)
+
+    def remove_object(self, object: GameObject):
+        self.objects.remove(object)
 
     def run(self):
-        self.update()  # calls the function 'def update(self):'
-        self.paint()  # calls the function 'def paint(self):'
-        self.root.after(self.time_step, self.run)  # refresh @ 20 Hz
+        self.running = True
+        self._run()
+        self.root.mainloop()
+
+    def _run(self):
+        self.update()
+        self.paint()
+        if self.running:
+            self.timer_id = self.root.after(self.time_step, self._run)
 
     def end(self):
+        self.running = False
+        if self.timer_id is not None:
+            self.root.after_cancel(self.timer_id)
         self.root.destroy()  # closes the game window and ends the program
 
     def update(self):
-        self.mouse.update()
-        self.wave_generator.update()
-        self.display_board.update()
-        for projectile in PROJECTILES:
-            projectile.update()
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            BLOCK_GRID[x][y].update()  # updates each block one by one
-        for monster in MONSTERS:
-            monster.update()
-
-        global MONSTERS_BY_HEALTH
-        global MONSTERS_BY_HEALTH_REVERSED
-        global MONSTERS_BY_DISTANCE
-        global MONSTERS_BY_DISTANCE_REVERSED
-        global MONSTERS_LIST
-        MONSTERS_BY_HEALTH = sorted(MONSTERS, key=lambda x: x.health, reverse=True)
-        MONSTERS_BY_DISTANCE = sorted(
-            MONSTERS, key=lambda x: x.distance_traveled, reverse=True
-        )
-        MONSTERS_BY_HEALTH_REVERSED = MONSTERS_BY_HEALTH[::-1]
-        MONSTERS_BY_DISTANCE_REVERSED = MONSTERS_BY_DISTANCE[::-1]
-        MONSTERS_LIST = [
-            MONSTERS_BY_HEALTH,
-            MONSTERS_BY_HEALTH_REVERSED,
-            MONSTERS_BY_DISTANCE,
-            MONSTERS_BY_DISTANCE_REVERSED,
-        ]
-
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            if TOWER_GRID[x][y]:
-                TOWER_GRID[x][y].update()  # updates each tower one by one
+        """Updates the game"""
+        for obj in self.objects:
+            obj.update()
 
     def paint(self):
+        """Paints the game"""
         self.canvas.delete(tk.ALL)  # clear the screen
-        self.game_map.paint(self.canvas)
-        self.mouse.paint(self.canvas)  # draw the mouse dot
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            if TOWER_GRID[x][y]:
-                TOWER_GRID[x][y].paint(self.canvas)
-        for monster in MONSTERS_BY_DISTANCE_REVERSED:
-            monster.paint(self.canvas)
-        for projectile in PROJECTILES:
-            projectile.paint(self.canvas)
-        if DISPLAY_TOWER:
-            DISPLAY_TOWER.paint_select(self.canvas)
-        self.display_board.paint()
+        for obj in self.objects:
+            obj.paint(self.canvas)
