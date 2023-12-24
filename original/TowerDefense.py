@@ -9,6 +9,8 @@ from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
 from PIL import Image, ImageTk
 
+from game import Game
+
 GRID_SIZE = 30  # the height and width of the array of blocks
 BLOCK_SIZE = 20  # pixels wide of each block
 MAP_SIZE = GRID_SIZE * BLOCK_SIZE
@@ -58,47 +60,22 @@ SELECTED_TOWER = "<None>"
 DISPLAY_TOWER = None
 
 
-class Game:  # the main class that we call "Game"
-    def __init__(self):  # setting up the window for the game here
-        self.root = Tk()  # saying this window will use tkinter
-        self.root.title("Tower Defense Ultra Mode")
-        self.root.protocol("WM_DELETE_WINDOW", self.end)
+class TowerDefenseGame(Game):
+    def __init__(self):
+        super().__init__(title="Tower Defense", width=MAP_SIZE, height=MAP_SIZE)
 
-        self.frame = Frame(master=self.root)
-        self.frame.grid(row=0, column=0)
-
-        self.canvas = Canvas(
-            master=self.frame,
-            width=MAP_SIZE,
-            height=MAP_SIZE,
-            bg="white",
-            highlightthickness=0,
-        )  # actually creates a window and puts our frame on it
-        self.canvas.grid(
-            row=0, column=0, rowspan=2, columnspan=1
-        )  # makes the window called "canvas" complete
-
+    def initialize(self):
         self.display_board = DisplayBoard(self)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
-        self.mouse = Mouse(self)
-        self.game_map = Map()
-        self.wave_generator = WaveGenerator(self)
-        self.run()  # calls the function 'def run(self):'
-        self.root.mainloop()  # starts running the tkinter graphics loop
 
-    def run(self):
-        self.update()  # calls the function 'def update(self):'
-        self.paint()  # calls the function 'def paint(self):'
-        self.root.after(50, self.run)  # refresh @ 20 Hz
-
-    def end(self):
-        self.root.destroy()  # closes the game window and ends the program
+        self.add_object(Map())
+        self.add_object(Mouse(self))
+        self.add_object(WaveGenerator())
 
     def update(self):
-        self.mouse.update()
-        self.wave_generator.update()
-        self.display_board.update()
+        super().update()
+
         for projectile in PROJECTILES:
             projectile.update()
         for x, y in product(range(GRID_SIZE), repeat=2):
@@ -129,9 +106,8 @@ class Game:  # the main class that we call "Game"
                 TOWER_GRID[x][y].update()  # updates each tower one by one
 
     def paint(self):
-        self.canvas.delete(ALL)  # clear the screen
-        self.game_map.paint(self.canvas)
-        self.mouse.paint(self.canvas)  # draw the mouse dot
+        super().paint()
+
         for x, y in product(range(GRID_SIZE), repeat=2):
             if TOWER_GRID[x][y]:
                 TOWER_GRID[x][y].paint(self.canvas)
