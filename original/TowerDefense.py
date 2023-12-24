@@ -4,6 +4,7 @@
 
 import math
 import random
+from enum import Enum, auto
 from itertools import product
 from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
@@ -60,9 +61,16 @@ SELECTED_TOWER = "<None>"
 DISPLAY_TOWER = None
 
 
+class GameState(Enum):
+    IDLE = auto()
+    WAIT_FOR_SPAWN = auto()
+    SPAWNING = auto()
+
+
 class TowerDefenseGame(Game):
     def __init__(self):
         super().__init__(title="Tower Defense", width=MAP_SIZE, height=MAP_SIZE)
+        self.state = GameState.IDLE
 
     def initialize(self):
         self.display_board = DisplayBoard(self)
@@ -165,7 +173,7 @@ class WaveGenerator:
         self.wave_file = open("texts/waveTexts/WaveGenerator2.txt", "r")
 
     def get_wave(self):
-        self.game.display_board.next_wave_button.can_press = False
+        self.game.set_state(GameState.SPAWNING)
         self.current_monster = 1
         self.waveLine = self.wave_file.readline()
         if len(self.waveLine):
@@ -259,17 +267,20 @@ class WaveGenerator:
 
     def update(self):
         if not self.done:
-            if self.current_monster == len(self.current_wave):
-                self.game.display_board.next_wave_button.can_press = True
-            else:
-                self.ticks += +1
-                if self.ticks == self.max_ticks:
-                    self.ticks = 0
-                    self.spawn_monster()
+            return
+        if self.game.state == GameState.WAIT_FOR_SPAWN:
+            self.get_wave()
+        if self.current_monster == len(self.current_wave):
+            self.game.display_board.next_wave_button.can_press = True
+        else:
+            self.ticks += +1
+            if self.ticks == self.max_ticks:
+                self.ticks = 0
+                self.spawn_monster()
 
 
 class NextWaveButton:
-    def __init__(self, game):
+    def __init__(self, game: TowerDefenseGame):
         self.game = game
         self.x1 = 450
         self.y1 = 25
@@ -287,7 +298,7 @@ class NextWaveButton:
             and len(MONSTERS) == 0
             and self.is_within_bounds(x, y)
         ):
-            self.game.wave_generator.get_wave()
+            self.game.set_state(GameState.WAIT_FOR_SPAWN)
 
     def paint(self, canvas):
         if self.can_press and len(MONSTERS) == 0:

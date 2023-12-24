@@ -1,4 +1,5 @@
 import tkinter as tk
+from enum import Enum
 from typing import List, Optional, Protocol
 
 
@@ -19,6 +20,7 @@ class Game:  # the main class that we call "Game"
 
         self.running = False
         self.timer_id: Optional[str] = None
+        self.state: Optional[Enum] = None
 
         self.root = tk.Tk()  # saying this window will use tkinter
         self.root.title(title)
@@ -39,6 +41,9 @@ class Game:  # the main class that we call "Game"
         self.canvas.grid(row=0, column=0, rowspan=2, columnspan=1)
 
         self.objects: List[GameObject] = []
+
+    def set_state(self, state: Enum):
+        self.state = state
 
     def add_object(self, object: GameObject):
         self.objects.append(object)
