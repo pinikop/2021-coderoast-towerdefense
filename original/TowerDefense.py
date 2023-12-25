@@ -933,16 +933,12 @@ class Monster:
         self.movement = 0.0
         self.tick = 0
         self.max_tick = 1
-        self.distance_traveled = distance
-        if self.distance_traveled <= 0:
-            self.distance_traveled = 0
+        self.distance_traveled = max(distance, 0)
         self.x, self.y = self.position_formula(self.distance_traveled)
         self.armor = 0
         self.magic_resist = 0
         self.value = 0
-        self.image = Image.open(
-            "images/monsterImages/" + self.__class__.__name__ + ".png"
-        )
+        self.image = Image.open("images/monsterImages/{self.__class__.__name__}.png")
         self.image = ImageTk.PhotoImage(self.image)
 
     def update(self):
