@@ -11,14 +11,12 @@ from itertools import product
 from PIL import Image, ImageTk
 
 from game import Game, GameObject
+from game_map import Grid
 from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of blocks
 BLOCK_SIZE = 20  # pixels wide of each block
 MAP_SIZE = GRID_SIZE * BLOCK_SIZE
-BLOCK_GRID = [
-    [0 for y in range(GRID_SIZE)] for x in range(GRID_SIZE)
-]  # creates the array for the gridTowerDefenseGame
 BLOCK_DICT = ["NormalBlock", "PathBlock", "WaterBlock"]
 MONSTER_DICT = [
     "Monster1",
@@ -64,6 +62,7 @@ class TowerDefenseGame(Game):
 
     def initialize(self):
         # self.display_board = DisplayBoard(self)
+        self.grid = Grid(GRID_SIZE, GRID_SIZE)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
 
@@ -79,8 +78,7 @@ class TowerDefenseGame(Game):
 
         # for projectile in PROJECTILES:
         #     projectile.update()
-        # for x, y in product(range(GRID_SIZE), repeat=2):
-        #     BLOCK_GRID[x][y].update()  # updates each block one by one
+        # self.grid.update()
         # for monster in MONSTERS:
         #     monster.update()
 
@@ -122,29 +120,29 @@ class TowerDefenseGame(Game):
 
 
 class Map(GameObject):
-    def __init__(self):
+    def __init__(self, grid):
         self.image = None
         self.load_map("LeoMap")
+        self.grid = grid
 
     def load_map(self, mapName):
         self.drawn_map = Image.new("RGBA", (MAP_SIZE, MAP_SIZE), (255, 255, 255, 255))
         self.map_file = open("texts/mapTexts/" + mapName + ".txt", "r")
         self.grid_values = list(map(int, (self.map_file.read()).split()))
         for x, y in product(range(GRID_SIZE), repeat=2):
-            global BLOCK_GRID
             self.block_number = self.grid_values[GRID_SIZE * y + x]
             self.block_type = globals()[BLOCK_DICT[self.block_number]]
-            BLOCK_GRID[x][y] = self.block_type(
-                x * BLOCK_SIZE + BLOCK_SIZE / 2,
-                y * BLOCK_SIZE + BLOCK_SIZE / 2,
-                self.block_number,
-                x,
-                y,
-            )  # creates a grid of Blocks
-            BLOCK_GRID[x][y].paint(self.drawn_map)
-        self.drawn_map.save("images/mapImages/" + mapName + ".png")
-        self.image = Image.open("images/mapImages/" + mapName + ".png")
-        self.image = ImageTk.PhotoImage(self.image)
+            self.grid.add_object(
+                self.block_type(
+                    x * BLOCK_SIZE + BLOCK_SIZE / 2,
+                    y * BLOCK_SIZE + BLOCK_SIZE / 2,
+                    self.block_number,
+                    x,
+                    y,
+                )
+            )
+        self.grid.paint(self.drawn_map)
+        self.drawn_map = ImageTk.PhotoImage(self.image)
 
     def paint(self, canvas):
         canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
@@ -180,13 +178,13 @@ class WaveGenerator(GameObject):
         global SPAWN_X
         global SPAWN_Y
         for x in range(GRID_SIZE):
-            if isinstance(BLOCK_GRID[x][0], PathBlock):
+            if isinstance(self.game.grid_get_object(x, 0), PathBlock):
                 self.grid_x = x
                 SPAWN_X = x * BLOCK_SIZE + BLOCK_SIZE / 2
                 SPAWN_Y = 0
                 return
         for y in range(GRID_SIZE):
-            if isinstance(BLOCK_GRID[0][y], PathBlock):
+            if isinstance(self.game.grid_get_object(0, y), PathBlock):
                 self.grid_y = y
                 SPAWN_X = 0
                 SPAWN_Y = y * BLOCK_SIZE + BLOCK_SIZE / 2
@@ -212,7 +210,9 @@ class WaveGenerator(GameObject):
             and self.grid_y >= 0
             and self.grid_y <= GRID_SIZE - 1
         ):
-            if isinstance(BLOCK_GRID[self.grid_x + 1][self.grid_y], PathBlock):
+            if isinstance(
+                self.game.grid.get_object(self.grid_x + 1, self.grid_y), PathBlock
+            ):
                 self.direction = 1
                 self.move()
                 return
@@ -223,7 +223,9 @@ class WaveGenerator(GameObject):
             and self.grid_y >= 0
             and self.grid_y <= GRID_SIZE - 1
         ):
-            if isinstance(BLOCK_GRID[self.grid_x - 1][self.grid_y], PathBlock):
+            if isinstance(
+                self.game.grid.get_object(self.grid_x - 1, self.grid_y), PathBlock
+            ):
                 self.direction = 2
                 self.move()
                 return
@@ -234,7 +236,9 @@ class WaveGenerator(GameObject):
             and self.grid_x >= 0
             and self.grid_x <= GRID_SIZE - 1
         ):
-            if isinstance(BLOCK_GRID[self.grid_x][self.grid_y + 1], PathBlock):
+            if isinstance(
+                self.game.grid.get_object(self.grid_x, self.grid_y + 1), PathBlock
+            ):
                 self.direction = 3
                 self.move()
                 return
@@ -245,7 +249,9 @@ class WaveGenerator(GameObject):
             and self.grid_x >= 0
             and self.grid_x <= GRID_SIZE - 1
         ):
-            if isinstance(BLOCK_GRID[self.grid_x][self.grid_y - 1], PathBlock):
+            if isinstance(
+                self.game.grid.get_object(self.grid_x, self.grid_y - 1), PathBlock
+            ):
                 self.direction = 4
                 self.move()
                 return
@@ -593,7 +599,9 @@ class Mouse:
 
     def update(self):
         if self.is_within_bounds():
-            BLOCK_GRID[self.grid_x][self.grid_y].hovered_over(self.pressed, self.game)
+            self.game.grid.get_object(self.grid_x, self.grid_y).hovered_over(
+                self.pressed, self.game
+            )
         else:
             self.game.display_board.next_wave_button.check_press(
                 self.pressed, self.x - self.offset_x, self.y - self.offset_y
@@ -604,7 +612,7 @@ class Mouse:
 
     def paint(self, canvas):
         if self.is_within_bounds():
-            if BLOCK_GRID[self.grid_x][self.grid_y].can_place:
+            if self.game.grid.get_object(self.grid_x, self.grid_y).can_place:
                 canvas.create_image(
                     self.grid_x * BLOCK_SIZE,
                     self.grid_y * BLOCK_SIZE,

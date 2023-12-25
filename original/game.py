@@ -11,6 +11,19 @@ class GameObject(Protocol):
         """Paints the game object"""
 
 
+class BaseObject(GameObject):
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+        self.name = "BaseObject"
+
+    def update(self):
+        pass
+
+    def paint(self, canvas):
+        canvas.create_image(self.x, self.y, None)
+
+
 class Game:  # the main class that we call "Game"
     def __init__(self, title: str, width: int, height: int, time_step: int = 50):
         self.title = title
