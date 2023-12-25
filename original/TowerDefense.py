@@ -5,7 +5,6 @@
 import math
 import random
 import tkinter as tk
-from dataclasses import dataclass
 from enum import Enum, auto
 from itertools import product
 
@@ -1044,12 +1043,10 @@ class Monster2(Monster):
         self.axis = BLOCK_SIZE / 2
 
     def killed(self):
-        global MONEY
-        MONEY += self.value
+        super().killed()
         MONSTERS.append(
             Monster1(self.distance_traveled + BLOCK_SIZE * (0.5 - random.random()))
         )
-        self.die()
 
 
 class AlexMonster(Monster):
@@ -1063,13 +1060,11 @@ class AlexMonster(Monster):
         self.axis = BLOCK_SIZE
 
     def killed(self):
-        global MONEY
-        MONEY += self.value
+        super().killed()
         for _ in range(5):
             MONSTERS.append(
                 Monster2(self.distance_traveled + BLOCK_SIZE * (0.5 - random.random()))
             )
-        self.die()
 
 
 class BenMonster(Monster):
@@ -1083,15 +1078,13 @@ class BenMonster(Monster):
         self.axis = BLOCK_SIZE / 2
 
     def killed(self):
-        global MONEY
-        MONEY += self.value
+        super().killed()
         for _ in range(2):
             MONSTERS.append(
                 LeoMonster(
                     self.distance_traveled + BLOCK_SIZE * (0.5 - random.random())
                 )
             )
-        self.die()
 
 
 class LeoMonster(Monster):
