@@ -4,20 +4,22 @@
 
 import math
 import random
+import tkinter as tk
+from dataclasses import dataclass
 from enum import Enum, auto
 from itertools import product
-from tkinter import ALL, CENTER, END, NW, Canvas, Frame, Listbox, Tk
 
 from PIL import Image, ImageTk
 
-from game import Game
+from game import Game, GameObject
+from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of blocks
 BLOCK_SIZE = 20  # pixels wide of each block
 MAP_SIZE = GRID_SIZE * BLOCK_SIZE
 BLOCK_GRID = [
     [0 for y in range(GRID_SIZE)] for x in range(GRID_SIZE)
-]  # creates the array for the grid
+]  # creates the array for the gridTowerDefenseGame
 BLOCK_DICT = ["NormalBlock", "PathBlock", "WaterBlock"]
 MONSTER_DICT = [
     "Monster1",
@@ -27,18 +29,7 @@ MONSTER_DICT = [
     "LeoMonster",
     "MonsterBig",
 ]
-TOWER_DICT = {
-    "Arrow Shooter": "ArrowShooterTower",
-    "Bullet Shooter": "BulletShooterTower",
-    "Tack Tower": "TackTower",
-    "Power Tower": "PowerTower",
-}
-TOWER_COST = {
-    "Arrow Shooter": 150,
-    "Bullet Shooter": 150,
-    "Tack Tower": 150,
-    "Power Tower": 200,
-}
+
 TOWER_GRID = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 PATH_LIST = []
 SPAWN_X = 0
@@ -57,7 +48,6 @@ MONSTERS_LIST = [
 PROJECTILES = []
 HEALTH = 100
 MONEY = 5000000000
-SELECTED_TOWER = "<None>"
 DISPLAY_TOWER = None
 
 
@@ -71,64 +61,68 @@ class TowerDefenseGame(Game):
     def __init__(self):
         super().__init__(title="Tower Defense", width=MAP_SIZE, height=MAP_SIZE)
         self.state = GameState.IDLE
+        self.tower = Towers.NONE
 
     def initialize(self):
-        self.display_board = DisplayBoard(self)
+        # self.display_board = DisplayBoard(self)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
 
-        self.add_object(Map())
-        self.add_object(Mouse(self))
-        self.add_object(WaveGenerator())
+        # self.add_object(Map())
+        # self.add_object(Mouse(self))
+        # self.add_object(WaveGenerator(self))
+
+    def set_tower(self, tower: Enum):
+        self.tower = tower
 
     def update(self):
         super().update()
 
-        for projectile in PROJECTILES:
-            projectile.update()
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            BLOCK_GRID[x][y].update()  # updates each block one by one
-        for monster in MONSTERS:
-            monster.update()
+        # for projectile in PROJECTILES:
+        #     projectile.update()
+        # for x, y in product(range(GRID_SIZE), repeat=2):
+        #     BLOCK_GRID[x][y].update()  # updates each block one by one
+        # for monster in MONSTERS:
+        #     monster.update()
 
-        global MONSTERS_BY_HEALTH
-        global MONSTERS_BY_HEALTH_REVERSED
-        global MONSTERS_BY_DISTANCE
-        global MONSTERS_BY_DISTANCE_REVERSED
-        global MONSTERS_LIST
-        MONSTERS_BY_HEALTH = sorted(MONSTERS, key=lambda x: x.health, reverse=True)
-        MONSTERS_BY_DISTANCE = sorted(
-            MONSTERS, key=lambda x: x.distance_traveled, reverse=True
-        )
-        MONSTERS_BY_HEALTH_REVERSED = MONSTERS_BY_HEALTH[::-1]
-        MONSTERS_BY_DISTANCE_REVERSED = MONSTERS_BY_DISTANCE[::-1]
-        MONSTERS_LIST = [
-            MONSTERS_BY_HEALTH,
-            MONSTERS_BY_HEALTH_REVERSED,
-            MONSTERS_BY_DISTANCE,
-            MONSTERS_BY_DISTANCE_REVERSED,
-        ]
+        # global MONSTERS_BY_HEALTH
+        # global MONSTERS_BY_HEALTH_REVERSED
+        # global MONSTERS_BY_DISTANCE
+        # global MONSTERS_BY_DISTANCE_REVERSED
+        # global MONSTERS_LIST
+        # MONSTERS_BY_HEALTH = sorted(MONSTERS, key=lambda x: x.health, reverse=True)
+        # MONSTERS_BY_DISTANCE = sorted(
+        #     MONSTERS, key=lambda x: x.distance_traveled, reverse=True
+        # )
+        # MONSTERS_BY_HEALTH_REVERSED = MONSTERS_BY_HEALTH[::-1]
+        # MONSTERS_BY_DISTANCE_REVERSED = MONSTERS_BY_DISTANCE[::-1]
+        # MONSTERS_LIST = [
+        #     MONSTERS_BY_HEALTH,
+        #     MONSTERS_BY_HEALTH_REVERSED,
+        #     MONSTERS_BY_DISTANCE,
+        #     MONSTERS_BY_DISTANCE_REVERSED,
+        # ]
 
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            if TOWER_GRID[x][y]:
-                TOWER_GRID[x][y].update()  # updates each tower one by one
+        # for x, y in product(range(GRID_SIZE), repeat=2):
+        #     if TOWER_GRID[x][y]:
+        #         TOWER_GRID[x][y].update()  # updates each tower one by one
 
     def paint(self):
         super().paint()
 
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            if TOWER_GRID[x][y]:
-                TOWER_GRID[x][y].paint(self.canvas)
-        for monster in MONSTERS_BY_DISTANCE_REVERSED:
-            monster.paint(self.canvas)
-        for projectile in PROJECTILES:
-            projectile.paint(self.canvas)
-        if DISPLAY_TOWER:
-            DISPLAY_TOWER.paint_select(self.canvas)
-        self.display_board.paint()
+        # for x, y in product(range(GRID_SIZE), repeat=2):
+        #     if TOWER_GRID[x][y]:
+        #         TOWER_GRID[x][y].paint(self.canvas)
+        # for monster in MONSTERS_BY_DISTANCE_REVERSED:
+        #     monster.paint(self.canvas)
+        # for projectile in PROJECTILES:
+        #     projectile.paint(self.canvas)
+        # if DISPLAY_TOWER:
+        #     DISPLAY_TOWER.paint_select(self.canvas)
+        # self.display_board.paint()
 
 
-class Map:
+class Map(GameObject):
     def __init__(self):
         self.image = None
         self.load_map("LeoMap")
@@ -154,10 +148,10 @@ class Map:
         self.image = ImageTk.PhotoImage(self.image)
 
     def paint(self, canvas):
-        canvas.create_image(0, 0, image=self.image, anchor=NW)
+        canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
 
 
-class WaveGenerator:
+class WaveGenerator(GameObject):
     def __init__(self, game):
         self.game = game
         self.done = False
@@ -266,7 +260,7 @@ class WaveGenerator:
         self.current_monster = self.current_monster + 1
 
     def update(self):
-        if not self.done:
+        if self.done:
             return
         if self.game.state == GameState.WAIT_FOR_SPAWN:
             self.get_wave()
@@ -380,12 +374,12 @@ class UpgradeButton(BaseButton):
 
 class InfoBoard:
     def __init__(self, game):
-        self.canvas = Canvas(
+        self.canvas = tk.Canvas(
             master=game.frame, width=162, height=174, bg="gray", highlightthickness=0
         )
         self.canvas.grid(row=0, column=1)
         self.image = ImageTk.PhotoImage(Image.open("images/infoBoard.png"))
-        self.canvas.create_image(0, 0, image=self.image, anchor=NW)
+        self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
         self.current_buttons = []
 
     def buttons_check(self, click, x, y):
@@ -396,8 +390,8 @@ class InfoBoard:
                     return
 
     def display_specific(self):
-        self.canvas.delete(ALL)  # clear the screen
-        self.canvas.create_image(0, 0, image=self.image, anchor=NW)
+        self.canvas.delete(tk.ALL)  # clear the screen
+        self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
         self.current_buttons = []
         if DISPLAY_TOWER is None:
             return
@@ -412,27 +406,37 @@ class InfoBoard:
             )
         )
         self.canvas.create_text(80, 75, text=DISPLAY_TOWER.name, font=("times", 20))
-        self.canvas.create_image(5, 5, image=self.towerImage, anchor=NW)
+        self.canvas.create_image(5, 5, image=self.towerImage, anchor=tk.NW)
 
         if issubclass(DISPLAY_TOWER.__class__, TargetingTower):
             self.current_buttons.append(TargetButton(26, 30, 35, 39, 0))
             self.canvas.create_text(
-                37, 28, text="> Health", font=("times", 12), fill="white", anchor=NW
+                37, 28, text="> Health", font=("times", 12), fill="white", anchor=tk.NW
             )
 
             self.current_buttons.append(TargetButton(26, 50, 35, 59, 1))
             self.canvas.create_text(
-                37, 48, text="< Health", font=("times", 12), fill="white", anchor=NW
+                37, 48, text="< Health", font=("times", 12), fill="white", anchor=tk.NW
             )
 
             self.current_buttons.append(TargetButton(92, 50, 101, 59, 2))
             self.canvas.create_text(
-                103, 48, text="> Distance", font=("times", 12), fill="white", anchor=NW
+                103,
+                48,
+                text="> Distance",
+                font=("times", 12),
+                fill="white",
+                anchor=tk.NW,
             )
 
             self.current_buttons.append(TargetButton(92, 30, 101, 39, 3))
             self.canvas.create_text(
-                103, 28, text="< Distance", font=("times", 12), fill="white", anchor=NW
+                103,
+                28,
+                text="< Distance",
+                font=("times", 12),
+                fill="white",
+                anchor=tk.NW,
             )
 
             self.current_buttons.append(StickyButton(10, 40, 19, 49))
@@ -445,38 +449,42 @@ class InfoBoard:
                     text="Upgrade: " + str(DISPLAY_TOWER.upgrade_cost),
                     font=("times", 12),
                     fill="light green",
-                    anchor=CENTER,
+                    anchor=tk.CENTER,
                 )
 
             self.canvas.create_text(
-                28, 146, text="Sell", font=("times", 22), fill="light green", anchor=NW
+                28,
+                146,
+                text="Sell",
+                font=("times", 22),
+                fill="light green",
+                anchor=tk.NW,
             )
 
             self.current_buttons[DISPLAY_TOWER.target_list].paint(self.canvas)
             if DISPLAY_TOWER.sticky_target:
                 self.current_buttons[4].paint(self.canvas)
 
-    def display_generic(self):
+    def display_generic(self, tower):
         self.current_buttons = []
-        if SELECTED_TOWER == "<None>":
+        if tower == Towers.NONE:
             self.text = None
             self.towerImage = None
         else:
-            self.text = SELECTED_TOWER + " cost: " + str(TOWER_COST[SELECTED_TOWER])
+            t = tower.value
+            self.text = f"{t.name} cost: {t.cost}"
             self.towerImage = ImageTk.PhotoImage(
-                Image.open(
-                    "images/towerImages/" + TOWER_DICT[SELECTED_TOWER] + "/1.png"
-                )
+                Image.open(f"images/towerImages/{t.name}/1.png")
             )
-        self.canvas.delete(ALL)  # clear the screen
-        self.canvas.create_image(0, 0, image=self.image, anchor=NW)
+        self.canvas.delete(tk.ALL)  # clear the screen
+        self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
         self.canvas.create_text(80, 75, text=self.text)
-        self.canvas.create_image(5, 5, image=self.towerImage, anchor=NW)
+        self.canvas.create_image(5, 5, image=self.towerImage, anchor=tk.NW)
 
 
 class DisplayBoard:
     def __init__(self, game):
-        self.canvas = Canvas(
+        self.canvas = tk.Canvas(
             master=game.frame, width=600, height=80, bg="gray", highlightthickness=0
         )
         self.canvas.grid(row=2, column=0)
@@ -490,7 +498,7 @@ class DisplayBoard:
         self.money_bar.update()
 
     def paint(self):
-        self.canvas.delete(ALL)  # clear the screen
+        self.canvas.delete(tk.ALL)  # clear the screen
         self.health_bar.paint(self.canvas)
         self.money_bar.paint(self.canvas)
         self.next_wave_button.paint(self.canvas)
@@ -499,8 +507,8 @@ class DisplayBoard:
 class TowerBox:
     def __init__(self, game):
         self.game = game
-        self.box = Listbox(
-            master=game.frame,
+        self.box = tk.Listbox(
+            master=self.game.frame,
             selectmode="SINGLE",
             font=("times", 18),
             height=18,
@@ -510,18 +518,17 @@ class TowerBox:
             bd=1,
             highlightthickness=0,
         )
-        self.box.insert(END, "<None>")
-        for i in TOWER_DICT:
-            self.box.insert(END, i)
+        # self.box.insert(tk.END, Towers.NONE.value)
+        for t in Towers:
+            self.box.insert(tk.END, t.value.name)
         self.box.grid(row=1, column=1, rowspan=2)
         self.box.bind("<<ListboxSelect>>", self.on_select)
 
     def on_select(self, event):
-        global SELECTED_TOWER
         global DISPLAY_TOWER
-        SELECTED_TOWER = str(self.box.get(self.box.curselection()))
+        self.game.set_tower(Towers.from_value(self.box.get(self.box.curselection())))
         DISPLAY_TOWER = None
-        self.game.info_board.display_generic()
+        self.game.info_board.display_generic(self.game.tower)
 
 
 class Mouse:
@@ -603,14 +610,14 @@ class Mouse:
                     self.grid_x * BLOCK_SIZE,
                     self.grid_y * BLOCK_SIZE,
                     image=self.image,
-                    anchor=NW,
+                    anchor=tk.NW,
                 )
             else:
                 canvas.create_image(
                     self.grid_x * BLOCK_SIZE,
                     self.grid_y * BLOCK_SIZE,
                     image=self.can_not_press_image,
-                    anchor=NW,
+                    anchor=tk.NW,
                 )
 
 
@@ -643,9 +650,10 @@ class Projectile:
         self.y = y
         self.damage = damage
         self.speed = speed
+        self.target = None
 
     def update(self):
-        if target and not target.alive:
+        if self.target is not None and not self.target.alive:
             PROJECTILES.remove(self)
             return
         if self.hit:
@@ -773,7 +781,7 @@ class Tower:
         )
 
     def paint(self, canvas):
-        canvas.create_image(self.x, self.y, image=self.image, anchor=CENTER)
+        canvas.create_image(self.x, self.y, image=self.image, anchor=tk.CENTER)
 
 
 class ShootingTower(Tower):
@@ -1011,7 +1019,7 @@ class Monster:
             fill="green",
             outline="green",
         )
-        canvas.create_image(self.x, self.y, image=self.image, anchor=CENTER)
+        canvas.create_image(self.x, self.y, image=self.image, anchor=tk.CENTER)
 
 
 class Monster1(Monster):
@@ -1126,21 +1134,21 @@ class Block:
             global TOWER_GRID
             global MONEY
             if TOWER_GRID[self.grid_x][self.grid_y]:
-                if SELECTED_TOWER == "<None>":
+                if game.tower == Towers.NONE:
                     TOWER_GRID[self.grid_x][self.grid_y].clicked = True
                     global DISPLAY_TOWER
                     DISPLAY_TOWER = TOWER_GRID[self.grid_x][self.grid_y]
                     game.info_board.display_specific()
             elif (
-                SELECTED_TOWER != "<None>"
+                game.tower != Towers.NONE
                 and self.can_place == True
-                and MONEY >= TOWER_COST[SELECTED_TOWER]
+                and MONEY >= TowerCost[game.tower]
             ):
-                self.towerType = globals()[TOWER_DICT[SELECTED_TOWER]]
+                self.towerType = game.tower
                 TOWER_GRID[self.grid_x][self.grid_y] = self.towerType(
                     self.x, self.y, self.grid_x, self.grid_y
                 )
-                MONEY -= TOWER_COST[SELECTED_TOWER]
+                MONEY -= TowerCost[game.tower]
 
     def update(self):
         pass
@@ -1172,7 +1180,9 @@ class WaterBlock(Block):
 
 
 def main():
-    Game()  # start the application at Class Game()
+    game = TowerDefenseGame()  # start the application at Class Game()
+    game.initialize()
+    game.run()
 
 
 if __name__ == "__main__":
