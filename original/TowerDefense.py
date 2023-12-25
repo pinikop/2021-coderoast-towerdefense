@@ -11,13 +11,12 @@ from itertools import product
 from PIL import Image, ImageTk
 
 from game import Game, GameObject
-from game_map import Grid
+from game_map import Grid  # , Map
 from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of blocks
 BLOCK_SIZE = 20  # pixels wide of each block
 MAP_SIZE = GRID_SIZE * BLOCK_SIZE
-BLOCK_DICT = ["NormalBlock", "PathBlock", "WaterBlock"]
 MONSTER_DICT = [
     "Monster1",
     "Monster2",
@@ -55,18 +54,22 @@ class GameState(Enum):
 
 
 class TowerDefenseGame(Game):
-    def __init__(self):
-        super().__init__(title="Tower Defense", width=MAP_SIZE, height=MAP_SIZE)
+    def __init__(self, map_name="LeoMap"):
+        super().__init__(
+            title="Tower Defense",
+            width=MAP_SIZE,
+            height=MAP_SIZE,
+        )
         self.state = GameState.IDLE
         self.tower = Towers.NONE
+        self.map_name = map_name
 
     def initialize(self):
         # self.display_board = DisplayBoard(self)
         self.grid = Grid(GRID_SIZE, GRID_SIZE)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
-
-        # self.add_object(Map())
+        self.add_object(Map(self.grid, self.map_name, BLOCK_SIZE, BLOCK_SIZE))
         # self.add_object(Mouse(self))
         # self.add_object(WaveGenerator(self))
 
@@ -120,29 +123,63 @@ class TowerDefenseGame(Game):
 
 
 class Map(GameObject):
-    def __init__(self, grid):
-        self.image = None
-        self.load_map("LeoMap")
+    def __init__(self, grid, map_name: str, block_width: int, block_height: int):
+        self.block_width = block_width
+        self.block_height = block_height
         self.grid = grid
+        self.map_name = map_name
+        self.image = self.load_map()
 
-    def load_map(self, mapName):
-        self.drawn_map = Image.new("RGBA", (MAP_SIZE, MAP_SIZE), (255, 255, 255, 255))
-        self.map_file = open("texts/mapTexts/" + mapName + ".txt", "r")
-        self.grid_values = list(map(int, (self.map_file.read()).split()))
-        for x, y in product(range(GRID_SIZE), repeat=2):
-            self.block_number = self.grid_values[GRID_SIZE * y + x]
-            self.block_type = globals()[BLOCK_DICT[self.block_number]]
+    def read_map_file(self):
+        map_file = f"texts/mapTexts/{self.map_name}.txt"
+        with open(map_file, "r") as mf:
+            map_str = mf.read()
+        return map_str
+
+    def parse_map_vector(self, map_str):
+        return list(map(int, map_str.split()))
+
+    def fill_grid(self, grid_values):
+        for j, i in product(range(self.grid.width), range(self.grid.height)):
+            block_int = grid_values[self.grid.width * j + i]
+            # @TODO: move to blocks file, function(block_int) ->
+            match block_int:
+                case 0:
+                    block_type = NormalBlock
+                case 1:
+                    block_type = PathBlock
+                case 2:
+                    block_type = WaterBlock
+            ################
+
             self.grid.add_object(
-                self.block_type(
-                    x * BLOCK_SIZE + BLOCK_SIZE / 2,
-                    y * BLOCK_SIZE + BLOCK_SIZE / 2,
-                    self.block_number,
-                    x,
-                    y,
-                )
+                block_type(
+                    i * self.block_width + self.block_width / 2,
+                    j * self.block_height + self.block_height / 2,
+                    block_int,
+                    i,
+                    j,
+                ),
+                i,
+                j,
             )
-        self.grid.paint(self.drawn_map)
-        self.drawn_map = ImageTk.PhotoImage(self.image)
+
+    def create_image(self):
+        image = Image.new(
+            "RGBA",
+            (self.block_width * self.grid.width, self.block_height * self.grid.height),
+            (255, 255, 255, 255),
+        )
+        self.grid.paint(image)
+        image = ImageTk.PhotoImage(image)
+        return image
+
+    def load_map(self):
+        map_str = self.read_map_file()
+        grid_values = self.parse_map_vector(map_str)
+        self.fill_grid(grid_values)
+        image = self.create_image()
+        return image
 
     def paint(self, canvas):
         canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
