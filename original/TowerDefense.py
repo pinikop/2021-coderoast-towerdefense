@@ -942,9 +942,7 @@ class Monster:
         self.image = ImageTk.PhotoImage(self.image)
 
     def update(self):
-        if self.health <= 0:
-            self.killed()
-        self.move()
+        self.killed() if self.health <= 0 else self.move()
 
     def move(self):
         if self.tick >= self.max_tick:
