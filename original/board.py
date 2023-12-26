@@ -10,22 +10,24 @@ from game import BaseObject, GameObject
 from tiles import Tiles
 
 
+@dataclass
 class Grid:
-    def __init__(self, width: int, height: int):
-        self.width = width
-        self.height = height
+    width: int
+    height: int
+
+    def __post_init__(self):
         self.grid: List[List[GameObject]] = [
             [BaseObject(i, j) for i in range(self.width)] for j in range(self.height)
         ]
 
     def get_object(self, i: int, j: int):
-        return self.grid[i][j]
+        return self.grid[j][i]
 
     def add_object(self, obj: GameObject, i: int, j: int):
-        self.grid[i][j] = obj
+        self.grid[j][i] = obj
 
     def remove_object(self, i: int, j: int):
-        self.grid[i][j] = BaseObject(i, j)
+        self.grid[j][i] = BaseObject(j, i)
 
     def update(self):
         """Updates the game"""
@@ -62,7 +64,7 @@ class Map(GameObject):
         return grid_values
 
     def fill_grid(self):
-        for j, i in product(range(self.grid_width), range(self.grid_height)):
+        for j, i in product(range(self.grid_height), range(self.grid_width)):
             block_int = self.grid_values[j][i]
             block_type = Tiles.from_value(block_int)
 
