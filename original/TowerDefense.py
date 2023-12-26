@@ -8,11 +8,12 @@ from enum import Enum, auto
 
 from PIL import Image, ImageTk
 
-from board import Grid, Map
+from board import Map
 from game import Game, GameObject
 from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of tiles
+
 TILE_SIZE = 20  # pixels wide of each tile
 MAP_SIZE = GRID_SIZE * TILE_SIZE
 MONSTER_DICT = [
@@ -52,7 +53,7 @@ class GameState(Enum):
 
 
 class TowerDefenseGame(Game):
-    def __init__(self, map_name="LeoMap"):
+    def __init__(self, map_name="AlexMap_30x30.txt"):
         super().__init__(
             title="Tower Defense",
             width=MAP_SIZE,
@@ -64,10 +65,9 @@ class TowerDefenseGame(Game):
 
     def initialize(self):
         # self.display_board = DisplayBoard(self)
-        self.grid = Grid(GRID_SIZE, GRID_SIZE)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
-        self.add_object(Map(self.grid, self.map_name, TILE_SIZE, TILE_SIZE))
+        self.add_object(Map(self.map_name, TILE_SIZE, TILE_SIZE))
         # self.add_object(Mouse(self))
         # self.add_object(WaveGenerator(self))
 

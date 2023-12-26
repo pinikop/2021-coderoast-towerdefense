@@ -17,8 +17,8 @@ class BaseTile(GameObject):
     def tile(self):
         return Image.open(self.root_path / f"{self.tile_name}.png")
 
-    def paint(self, draw):
-        draw.paste(self.tile, (self.x, self.y))
+    def paint(self, canvas):
+        canvas.paste(self.tile, (self.x, self.y))
 
 
 class GroundTile(BaseTile):

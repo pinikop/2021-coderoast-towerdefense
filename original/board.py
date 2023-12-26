@@ -1,4 +1,5 @@
 import tkinter as tk
+from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
 from typing import List
@@ -20,8 +21,8 @@ class Grid:
     def get_object(self, i: int, j: int):
         return self.grid[i][j]
 
-    def add_object(self, object: GameObject, i: int, j: int):
-        self.grid[i][j] = object
+    def add_object(self, obj: GameObject, i: int, j: int):
+        self.grid[i][j] = obj
 
     def remove_object(self, i: int, j: int):
         self.grid[i][j] = BaseObject(i, j)
@@ -40,39 +41,39 @@ class Grid:
 
 
 class Map(GameObject):
-    def __init__(self, grid, map_name: str, block_width: int, block_height: int):
-        self.block_width = block_width
-        self.block_height = block_height
-        self.grid = grid
+    def __init__(self, map_name: str, tile_width: int, tile_height: int):
+        self.tile_width = tile_width
+        self.tile_height = tile_height
         self.map_name = map_name
         self.root_path = Path("./texts/mapTexts/")
+
+        self.initialize()
+
+    def initialize(self):
+        self.grid_values = self.read_map_file()
+        self.grid_width = len(self.grid_values[0])
+        self.grid_height = len(self.grid_values)
+        self.grid = Grid(self.grid_width, self.grid_height)
         self.image = self.load_map()
 
     def read_map_file(self):
-        map_file = self.root_path / f"{self.map_name}.txt"
-        with open(map_file, "r") as mf:
-            map_str = mf.read()
-        return map_str
+        with open(self.root_path / self.map_name, "r") as f:
+            grid_values = [list(map(int, row.split())) for row in f]
+        return grid_values
 
-    def parse_map_vector(self, map_str):
-        # return [
-        #     (i + j) % 3 for i in range(self.grid.width) for j in range(self.grid.height)
-        # ]
-        return list(map(int, map_str.split()))
-
-    def fill_grid(self, grid_values):
-        for j, i in product(range(self.grid.width), range(self.grid.height)):
-            block_int = grid_values[self.grid.width * j + i]
+    def fill_grid(self):
+        for j, i in product(range(self.grid_width), range(self.grid_height)):
+            block_int = self.grid_values[j][i]
             block_type = Tiles.from_value(block_int)
 
             self.grid.add_object(
-                block_type(i * self.block_width, j * self.block_height), i, j
+                block_type(i * self.tile_width, j * self.tile_height), i, j
             )
 
     def create_image(self):
         image = Image.new(
             "RGBA",
-            (self.block_width * self.grid.width, self.block_height * self.grid.height),
+            (self.tile_width * self.grid.width, self.tile_height * self.grid.height),
             (255, 255, 255, 255),
         )
         self.grid.paint(image)
@@ -80,9 +81,7 @@ class Map(GameObject):
         return image
 
     def load_map(self):
-        map_str = self.read_map_file()
-        grid_values = self.parse_map_vector(map_str)
-        self.fill_grid(grid_values)
+        self.fill_grid()
         image = self.create_image()
         return image
 
