@@ -1,17 +1,15 @@
 # IMPORTANT INFORMATION: the use of 'self' ALWAYS refers to the class that it is in.
 # EVERY FUNCTION INSIDE OF A CLASS MUST DECLARE SELF!
 # ex: 'def exampleFunction(self, input1, input2):
-
 import math
 import random
 import tkinter as tk
 from enum import Enum, auto
-from itertools import product
 
 from PIL import Image, ImageTk
 
 from game import Game, GameObject
-from game_map import Grid  # , Map
+from game_map import Grid, Map
 from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of blocks
@@ -120,69 +118,6 @@ class TowerDefenseGame(Game):
         # if DISPLAY_TOWER:
         #     DISPLAY_TOWER.paint_select(self.canvas)
         # self.display_board.paint()
-
-
-class Map(GameObject):
-    def __init__(self, grid, map_name: str, block_width: int, block_height: int):
-        self.block_width = block_width
-        self.block_height = block_height
-        self.grid = grid
-        self.map_name = map_name
-        self.image = self.load_map()
-
-    def read_map_file(self):
-        map_file = f"texts/mapTexts/{self.map_name}.txt"
-        with open(map_file, "r") as mf:
-            map_str = mf.read()
-        return map_str
-
-    def parse_map_vector(self, map_str):
-        return list(map(int, map_str.split()))
-
-    def fill_grid(self, grid_values):
-        for j, i in product(range(self.grid.width), range(self.grid.height)):
-            block_int = grid_values[self.grid.width * j + i]
-            # @TODO: move to blocks file, function(block_int) ->
-            match block_int:
-                case 0:
-                    block_type = NormalBlock
-                case 1:
-                    block_type = PathBlock
-                case 2:
-                    block_type = WaterBlock
-            ################
-
-            self.grid.add_object(
-                block_type(
-                    i * self.block_width + self.block_width / 2,
-                    j * self.block_height + self.block_height / 2,
-                    block_int,
-                    i,
-                    j,
-                ),
-                i,
-                j,
-            )
-
-    def create_image(self):
-        image = Image.new(
-            "RGBA",
-            (self.block_width * self.grid.width, self.block_height * self.grid.height),
-            (255, 255, 255, 255),
-        )
-        self.grid.paint(image)
-        image = ImageTk.PhotoImage(image)
-        return image
-
-    def load_map(self):
-        map_str = self.read_map_file()
-        grid_values = self.parse_map_vector(map_str)
-        self.fill_grid(grid_values)
-        image = self.create_image()
-        return image
-
-    def paint(self, canvas):
-        canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
 
 
 class WaveGenerator(GameObject):
@@ -1148,69 +1083,6 @@ class MonsterBig(Monster):
         self.axis = 3 * BLOCK_SIZE / 2
 
 
-class Block:
-    def __init__(
-        self, x, y, block_number, grid_x, grid_y
-    ):  # when i define a "Block", this is what happens
-        self.x = x  # sets Block x to the given 'x'
-        self.y = y  # sets Block y to the given 'y'
-        self.can_place = True
-        self.block_number = block_number
-        self.grid_x = grid_x
-        self.grid_y = grid_y
-        self.image = None
-        self.axis = BLOCK_SIZE / 2
-
-    def hovered_over(self, click, game):
-        if click:
-            global TOWER_GRID
-            global MONEY
-            if TOWER_GRID[self.grid_x][self.grid_y]:
-                if game.tower == Towers.NONE:
-                    TOWER_GRID[self.grid_x][self.grid_y].clicked = True
-                    global DISPLAY_TOWER
-                    DISPLAY_TOWER = TOWER_GRID[self.grid_x][self.grid_y]
-                    game.info_board.display_specific()
-            elif (
-                game.tower != Towers.NONE
-                and self.can_place == True
-                and MONEY >= TowerCost[game.tower]
-            ):
-                self.towerType = game.tower
-                TOWER_GRID[self.grid_x][self.grid_y] = self.towerType(
-                    self.x, self.y, self.grid_x, self.grid_y
-                )
-                MONEY -= TowerCost[game.tower]
-
-    def update(self):
-        pass
-
-    def paint(self, draw):
-        self.image = Image.open(
-            "images/blockImages/" + self.__class__.__name__ + ".png"
-        )
-        self.offset = (int(self.x - self.axis), int(self.y - self.axis))
-        draw.paste(self.image, self.offset)
-        self.image = None
-
-
-class NormalBlock(Block):
-    def __init__(self, x, y, block_number, grid_x, grid_y):
-        super().__init__(x, y, block_number, grid_x, grid_y)
-
-
-class PathBlock(Block):
-    def __init__(self, x, y, block_number, grid_x, grid_y):
-        super().__init__(x, y, block_number, grid_x, grid_y)
-        self.can_place = False
-
-
-class WaterBlock(Block):
-    def __init__(self, x, y, block_number, grid_x, grid_y):
-        super().__init__(x, y, block_number, grid_x, grid_y)
-        self.can_place = False
-
-
 def main():
     game = TowerDefenseGame()  # start the application at Class Game()
     game.initialize()
@@ -1219,3 +1091,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# def hovered_over(self, click, game):
+#         if click:
+#             global TOWER_GRID
+#             global MONEY
+#             if TOWER_GRID[self.grid_x][self.grid_y]:
+#                 if game.tower == Towers.NONE:
+#                     TOWER_GRID[self.grid_x][self.grid_y].clicked = True
+#                     global DISPLAY_TOWER
+#                     DISPLAY_TOWER = TOWER_GRID[self.grid_x][self.grid_y]
+#                     game.info_board.display_specific()
+#             elif (
+#                 game.tower != Towers.NONE
+#                 and self.can_place == True
+#                 and MONEY >= TowerCost[game.tower]
+#             ):
+#                 self.towerType = game.tower
+#                 TOWER_GRID[self.grid_x][self.grid_y] = self.towerType(
+#                     self.x, self.y, self.grid_x, self.grid_y
+#                 )
+#                 MONEY -= TowerCost[game.tower]
