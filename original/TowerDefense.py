@@ -8,8 +8,8 @@ from enum import Enum, auto
 
 from PIL import Image, ImageTk
 
+from board import Grid, Map
 from game import Game, GameObject
-from game_map import Grid, Map
 from towers import Towers
 
 GRID_SIZE = 30  # the height and width of the array of blocks
