@@ -1,33 +1,33 @@
 import tkinter as tk
 from dataclasses import dataclass
-from itertools import product
 from pathlib import Path
-from typing import List
+from typing import Callable, List, Tuple
 
 from PIL import Image, ImageTk
 
-from game import BaseObject, GameObject
-from tiles import Tiles
+from game import GameObject
+from tiles import choose_tile_type
 
 
 @dataclass
 class Grid:
-    width: int
-    height: int
+    values: List[List[int]]
+    tile_size: Tuple[int, int]
+    func: Callable
 
     def __post_init__(self):
-        self.grid: List[List[GameObject]] = [
-            [BaseObject(i, j) for i in range(self.width)] for j in range(self.height)
+        self.height = len(self.values)
+        self.width = len(self.values[0])
+        self.fill()
+
+    def fill(self):
+        self.grid = [
+            [self.func(self.values, i, j, self.tile_size) for i in range(self.width)]
+            for j in range(self.height)
         ]
 
     def get_object(self, i: int, j: int):
         return self.grid[j][i]
-
-    def add_object(self, obj: GameObject, i: int, j: int):
-        self.grid[j][i] = obj
-
-    def remove_object(self, i: int, j: int):
-        self.grid[j][i] = BaseObject(j, i)
 
     def update(self):
         """Updates the game"""
@@ -35,42 +35,30 @@ class Grid:
             for obj in row:
                 obj.update()
 
-    def paint(self, canvas):
+    def paint(self, image):
         """Paints the game"""
-        for row in self.grid:
-            for obj in row:
-                obj.paint(canvas)
+        for j, row in enumerate(self.grid):
+            for i, obj in enumerate(row):
+                obj.paint(image, i, j)
 
 
 class Map(GameObject):
-    def __init__(self, map_name: str, tile_width: int, tile_height: int):
-        self.tile_width = tile_width
-        self.tile_height = tile_height
+    def __init__(self, map_name: str, tile_size: Tuple[int, int]):
+        self.tile_width = tile_size[0]
+        self.tile_height = tile_size[1]
         self.map_name = map_name
         self.root_path = Path("./texts/mapTexts/")
 
         self.initialize()
 
     def initialize(self):
-        self.grid_values = self.read_map_file()
-        self.grid_width = len(self.grid_values[0])
-        self.grid_height = len(self.grid_values)
-        self.grid = Grid(self.grid_width, self.grid_height)
-        self.image = self.load_map()
+        self.create_grid()
+        self.create_image()
 
     def read_map_file(self):
         with open(self.root_path / self.map_name, "r") as f:
-            grid_values = [list(map(int, row.split())) for row in f]
+            grid_values = [list(map(int, row.split())) for row in f]  # type: ignore
         return grid_values
-
-    def fill_grid(self):
-        for j, i in product(range(self.grid_height), range(self.grid_width)):
-            block_int = self.grid_values[j][i]
-            block_type = Tiles.from_value(block_int)
-
-            self.grid.add_object(
-                block_type(i * self.tile_width, j * self.tile_height), i, j
-            )
 
     def create_image(self):
         image = Image.new(
@@ -79,13 +67,11 @@ class Map(GameObject):
             (255, 255, 255, 255),
         )
         self.grid.paint(image)
-        image = ImageTk.PhotoImage(image)
-        return image
+        self.image = ImageTk.PhotoImage(image)
 
-    def load_map(self):
-        self.fill_grid()
-        image = self.create_image()
-        return image
+    def create_grid(self):
+        values = self.read_map_file()
+        self.grid = Grid(values, (self.tile_width, self.tile_height), choose_tile_type)
 
     def paint(self, canvas):
         canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
