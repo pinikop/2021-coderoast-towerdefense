@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -6,39 +7,38 @@ from PIL import Image
 from game import GameObject
 
 
+@dataclass
 class BaseTile(GameObject):
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
-        self.root_path = Path("./images/blockImages/")
-        self.tile_name = ""
+    width: int
+    height: int
+    root_path: Path = Path("./images/blockImages/")
+    tile_name: str = ""
+    can_place: bool = False
 
     @property
     def tile(self):
-        return Image.open(self.root_path / f"{self.tile_name}.png")
+        return Image.open(self.root_path / f"{self.tile_name}.png").resize(
+            (self.width, self.height)
+        )
 
-    def paint(self, canvas):
-        canvas.paste(self.tile, (self.x, self.y))
+    def paint(self, image, x: int, y: int):
+        image.paste(self.tile, (x * self.width, y * self.height))
 
 
+@dataclass
 class GroundTile(BaseTile):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self.tile_name = "NormalBlock"
+    tile_name: str = "NormalBlock"
+    can_place: bool = True
 
 
+@dataclass
 class PathTile(BaseTile):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self.tile_name = "PathBlock"
-        self.can_place = False
+    tile_name: str = "PathBlock"
 
 
+@dataclass
 class WaterTile(BaseTile):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self.tile_name = "WaterBlock"
-        self.can_place = False
+    tile_name: str = "WaterBlock"
 
 
 class Tiles(Enum):
@@ -56,6 +56,12 @@ class Tiles(Enum):
             if item.idx == value:
                 return item.tile_type
         raise ValueError(f"{value} is not a valid value for {cls.__name__}")
+
+
+def choose_tile_type(values, i, j, size):
+    block_int = values[j][i]
+    block_type = Tiles.from_value(block_int)
+    return block_type(*size)
 
 
 # def hovered_over(self, click, game):
