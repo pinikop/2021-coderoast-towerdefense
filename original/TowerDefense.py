@@ -15,7 +15,7 @@ from towers import Towers
 GRID_SIZE = 30  # the height and width of the array of tiles
 
 TILE_SIZE = 20  # pixels wide of each tile
-MAP_SIZE = GRID_SIZE * TILE_SIZE
+MAP_SIZE = GRID_SIZE * 20
 MONSTER_DICT = [
     "Monster1",
     "Monster2",
@@ -53,11 +53,12 @@ class GameState(Enum):
 
 
 class TowerDefenseGame(Game):
-    def __init__(self, map_name="AlexMap_30x30.txt"):
+    def __init__(self, map_name="BenMap_30x30.txt"):
         super().__init__(
-            title="Tower Defense",
             width=MAP_SIZE,
             height=MAP_SIZE,
+            tile_size=(TILE_SIZE, TILE_SIZE),
+            title="Tower Defense",
         )
         self.state = GameState.IDLE
         self.tower = Towers.NONE
@@ -67,7 +68,7 @@ class TowerDefenseGame(Game):
         # self.display_board = DisplayBoard(self)
         self.info_board = InfoBoard(self)
         self.tower_box = TowerBox(self)
-        self.add_object(Map(self.map_name, TILE_SIZE, TILE_SIZE))
+        self.add_object(Map(self.map_name, self.tile_size))
         # self.add_object(Mouse(self))
         # self.add_object(WaveGenerator(self))
 
