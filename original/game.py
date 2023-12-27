@@ -1,34 +1,29 @@
 import tkinter as tk
 from enum import Enum
-from typing import List, Optional, Protocol
+from typing import Any, List, Optional, Tuple
 
 
-class GameObject(Protocol):
+class GameObject:
     def update(self):
         """Update the game object"""
 
-    def paint(self, canvas: tk.Canvas):
+    def paint(self, canvas: Any):
         """Paints the game object"""
 
 
-class BaseObject(GameObject):
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
-        self.name = "BaseObject"
-
-    def update(self):
-        pass
-
-    def paint(self, canvas):
-        canvas.create_image(self.x, self.y, None)
-
-
 class Game:  # the main class that we call "Game"
-    def __init__(self, title: str, width: int, height: int, time_step: int = 50):
+    def __init__(
+        self,
+        title: str,
+        width: int,
+        height: int,
+        tile_size: Tuple[int, int],
+        time_step: int = 50,
+    ):
         self.title = title
         self.width = width
         self.height = height
+        self.tile_size = tile_size
         self.time_step = time_step
 
         self.running = False
