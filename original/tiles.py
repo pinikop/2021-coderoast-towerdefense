@@ -1,28 +1,30 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Optional, Tuple
 
 from PIL import Image
 
-from game import GameObject
-
 
 @dataclass
-class BaseTile(GameObject):
-    width: int
-    height: int
+class BaseTile:
+    size: Optional[Tuple[int, int]] = None
     root_path: Path = Path("./images/blockImages/")
     tile_name: str = ""
     can_place: bool = False
 
-    @property
-    def tile(self):
-        return Image.open(self.root_path / f"{self.tile_name}.png").resize(
-            (self.width, self.height)
-        )
+    def __post_init__(self):
+        face = Image.open(self.root_path / f"{self.tile_name}.png")
+        if self.size is None:
+            self.width = face.width
+            self.height = face.width
+        else:
+            self.width, self.height = self.size
+            face = face.resize(self.size)
+        self.face = face
 
-    def paint(self, image, x: int, y: int):
-        image.paste(self.tile, (x * self.width, y * self.height))
+    def paste(self, image, x: int, y: int):
+        image.paste(self.face, (x * self.width, y * self.height))
 
 
 @dataclass
@@ -61,7 +63,7 @@ class Tiles(Enum):
 def choose_tile_type(values, i, j, size):
     block_int = values[j][i]
     block_type = Tiles.from_value(block_int)
-    return block_type(*size)
+    return block_type(size)
 
 
 # def hovered_over(self, click, game):
