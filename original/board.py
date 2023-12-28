@@ -9,6 +9,7 @@ from game import GameObject
 from tiles import choose_tile_type
 
 
+# todo: implement Cell class
 @dataclass
 class Grid:
     values: List[List[int]]
@@ -29,25 +30,20 @@ class Grid:
     def get_object(self, i: int, j: int):
         return self.grid[j][i]
 
-    def update(self):
-        """Updates the game"""
-        for row in self.grid:
-            for obj in row:
-                obj.update()
-
-    def paint(self, image):
-        """Paints the game"""
+    def tilling(self, image):
+        """Install tiles to the grid"""
         for j, row in enumerate(self.grid):
             for i, obj in enumerate(row):
-                obj.paint(image, i, j)
+                obj.paste(image, i, j)
 
 
 class Map(GameObject):
     def __init__(self, map_name: str, tile_size: Tuple[int, int]):
-        self.tile_width = tile_size[0]
+        self.tile_size = tile_size
+        self.tile_width = tile_size[0]  # FIXME: should it be Map attribute?
         self.tile_height = tile_size[1]
         self.map_name = map_name
-        self.root_path = Path("./texts/mapTexts/")
+        self.root_path = Path("./texts/mapTexts/")  # TODO: move to config file
 
         self.initialize()
 
@@ -60,18 +56,18 @@ class Map(GameObject):
             grid_values = [list(map(int, row.split())) for row in f]  # type: ignore
         return grid_values
 
+    def create_grid(self):
+        values = self.read_map_file()
+        self.grid = Grid(values, self.tile_size, choose_tile_type)
+
     def create_image(self):
         image = Image.new(
             "RGBA",
             (self.tile_width * self.grid.width, self.tile_height * self.grid.height),
             (255, 255, 255, 255),
         )
-        self.grid.paint(image)
+        self.grid.tilling(image)
         self.image = ImageTk.PhotoImage(image)
-
-    def create_grid(self):
-        values = self.read_map_file()
-        self.grid = Grid(values, (self.tile_width, self.tile_height), choose_tile_type)
 
     def paint(self, canvas):
         canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
